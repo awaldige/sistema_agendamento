@@ -1,0 +1,145 @@
+/* ================ CONFIGURAÇÃO GLOBAL ================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    background: #f3f6fb;
+    display: flex;
+}
+
+/* ================ SIDEBAR ================ */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #1e1f26;
+    position: fixed;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    transition: 0.3s;
+    z-index: 100;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    margin-bottom: 35px;
+}
+
+.sidebar-header h2 {
+    font-size: 22px;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* ================ MENU ================ */
+.menu {
+    list-style: none;
+    flex-grow: 1;
+}
+
+.menu li {
+    margin-bottom: 12px;
+}
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    color: #ddd;
+    text-decoration: none;
+    background: #2b2d36;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.menu a i {
+    font-size: 18px;
+}
+
+.sidebar.collapsed a span {
+    display: none;
+}
+
+.menu a:hover {
+    background: #4a4e69;
+    color: #fff;
+    transform: translateX(5px);
+}
+
+/* ================ LOGOUT ================ */
+.logout-box {
+    margin-top: auto;
+}
+
+.logout-btn {
+    background: #c92a2a;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #a51111;
+}
+
+/* ================ MAIN CONTENT ================ */
+.main-content {
+    margin-left: 260px;
+    padding: 25px;
+    width: 100%;
+    transition: 0.3s;
+}
+
+.sidebar.collapsed ~ .main-content {
+    margin-left: 80px;
+}
+
+/* HEADER */
+header {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+/* CONTENT BOX */
+.content-box {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
