@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: sistema-agendamento
+    env: docker
+    plan: free
+    rootDir: .
+    dockerfilePath: Dockerfile
