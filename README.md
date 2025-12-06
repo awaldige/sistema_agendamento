@@ -1,2 +1,15 @@
-# sistema_agendamento
-Sistema de Agendamentos PHP (Painel Administrativo)
+# Sistema de Agendamentos
+
+Este projeto consiste em um sistema administrativo para gerenciamento de agendamentos desenvolvido em PHP, utilizando MySQL com PDO para garantir uma camada robusta de segurança e manipulação consistente de dados. A aplicação foi projetada para atender ambientes operacionais que necessitam de controle centralizado de agendamentos, oferecendo recursos completos de autenticação, controle de sessão, gerenciamento de usuários e organização de serviços. O sistema opera com um painel administrativo responsivo, estruturado para facilitar o uso diário e proporcionar ao gestor uma visão clara das operações através de indicadores consolidados de agendamentos diários, semanais e mensais.
+
+A arquitetura do sistema utiliza PHP 7+ aliado ao MySQL/MariaDB, implementando PDO para comunicação com o banco de dados, o que permite prevenção contra ataques de injeção SQL e melhora a segurança geral da aplicação. A camada de apresentação foi desenvolvida utilizando HTML5, CSS3 e JavaScript, mantendo uma interface leve, responsiva e compatível com navegadores modernos. Recursos visuais são complementados com Font Awesome, aprimorando a usabilidade sem comprometer o desempenho. O código segue boas práticas de desenvolvimento, organização modular e tratamento adequado de exceções, garantindo maior previsibilidade e facilidade de manutenção.
+
+O processo de implantação é direto e adequado tanto para ambientes locais quanto para servidores dedicados. Para iniciar a instalação, é necessário clonar o repositório através de  
+git clone https://github.com/awaldige/sistema_agendamento.git  
+Criar o banco de dados denominado sistema_agendamentos e importar o arquivo .sql. Na sequência, é necessário adicionar manualmente os arquivos privados que não fazem parte do repositório público por questões de segurança, como conexao.php, login.php e criar_admin.php — esses arquivos contêm credenciais e lógica sensível e, portanto, devem ser configurados por cada administrador local. Após a configuração, a aplicação pode ser acessada via http://localhost/sistema_agendamento/ ou conforme a estrutura do servidor.
+
+Os arquivos sensíveis que poderiam comprometer o ambiente operacional foram deliberadamente excluídos do repositório e protegidos no .gitignore, incluindo conexao.php, login.php, criar_admin.php e .env. Para referência, são fornecidos apenas arquivos modelo com extensão *.example.php, garantindo que nenhum dado confidencial seja disponibilizado publicamente. Essa abordagem facilita a colaboração em equipe e evita incidentes de segurança relacionados a exposição de credenciais.
+
+A estrutura geral do projeto é composta pelos módulos principais responsáveis pelo painel administrativo — index.php, agendamentos.php, servicos.php e usuarios.php — além dos arquivos essenciais de apresentação, como style.css, login.css e script.js. O layout do projeto foi planejado para favorecer escalabilidade, permitindo a implementação futura de novas funcionalidades, integrações com APIs externas, módulos adicionais de relatórios e expansão da lógica de negócios conforme as necessidades do ambiente corporativo.
+
+Autor: André Waldige – GitHub: https://github.com/awaldige
