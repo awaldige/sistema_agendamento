@@ -2,7 +2,7 @@
 # ARQUIVOS SENSÍVEIS (NÃO ENVIAR)
 ########################################
 
-login.php
+
 
 criar_admin.php
 .env
@@ -35,3 +35,4 @@ Thumbs.db
 *.log
 *.cache
 *.tmp
+
