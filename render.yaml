@@ -3,5 +3,6 @@ services:
     name: sistema-agendamento
     env: docker
     plan: free
-    rootDir: .
-    dockerfilePath: Dockerfile
+    autoDeploy: true
+    buildCommand: ""
+    startCommand: ""
