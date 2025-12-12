@@ -143,3 +143,128 @@ header {
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
+
+/* ================ CARDS DASHBOARD ================ */
+.cards-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.card-item {
+    background: #ffffff;
+    padding: 28px 22px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: .25s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    border-left: 6px solid #4a6cf7;
+}
+
+.card-item i {
+    font-size: 40px;
+    margin-bottom: 12px;
+    color: #4a6cf7;
+}
+
+.card-item h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.card-item p {
+    font-size: 26px;
+    font-weight: bold;
+    color: #222;
+    margin-top: 5px;
+}
+
+.card-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    border-left-width: 8px;
+}
+
+/* =================================================================================
+   RESPONSIVIDADE
+================================================================================= */
+
+/* ======= TELAS MENORES QUE 1024PX ======= */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 220px;
+        padding: 20px;
+    }
+
+    .sidebar {
+        width: 220px;
+    }
+}
+
+/* ======= TELAS MENORES QUE 768PX (TABLET) ======= */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: fixed;
+        width: 200px;
+        height: 100vh;
+        left: -200px;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .toggle-btn {
+        display: block;
+    }
+}
+
+/* ======= TELAS MENORES QUE 480PX (CELULAR) ======= */
+@media (max-width: 480px) {
+    .sidebar {
+        width: 180px;
+    }
+
+    header {
+        padding: 15px;
+    }
+
+    .content-box {
+        padding: 15px;
+    }
+
+    .cards-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .card-item {
+        padding: 22px 18px;
+    }
+
+    .card-item i {
+        font-size: 34px;
+    }
+}
