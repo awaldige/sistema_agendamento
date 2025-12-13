@@ -8,9 +8,36 @@
 
 body {
     background: #f3f6fb;
-    display: flex;
     min-height: 100vh;
     overflow-x: hidden;
+}
+
+/* ================ TOPBAR MOBILE ================ */
+.topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #1e1f26;
+    color: #fff;
+    padding: 0 20px;
+    z-index: 1200;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.topbar h2 {
+    font-size: 18px;
+}
+
+.topbar button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
 }
 
 /* ================ SIDEBAR ================ */
@@ -25,7 +52,7 @@ body {
     display: flex;
     flex-direction: column;
     transition: 0.3s ease;
-    z-index: 1000;
+    z-index: 1100;
 }
 
 .sidebar.collapsed {
@@ -101,21 +128,21 @@ body {
     color: #fff;
     border-radius: 6px;
     text-decoration: none;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #a51111;
 }
 
 /* ================ MAIN CONTENT ================ */
 .main-content {
     margin-left: 260px;
     padding: 25px;
-    width: 100%;
     transition: 0.3s ease;
 }
 
-.sidebar.collapsed ~ .main-content {
-    margin-left: 80px;
-}
-
-/* ================ HEADER ================ */
+/* ================ HEADER DESKTOP ================ */
 header {
     background: #fff;
     padding: 20px;
@@ -132,6 +159,7 @@ header {
     align-items: center;
     gap: 8px;
     font-weight: 500;
+    color: #2c3e50;
 }
 
 /* ================ CONTENT BOX ================ */
@@ -139,9 +167,10 @@ header {
     background: #fff;
     padding: 25px;
     border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
-/* ================ CARDS DASHBOARD ================ */
+/* ================ CARDS ================ */
 .cards-dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -150,28 +179,21 @@ header {
 }
 
 .card-item {
-    background: #ffffff;
-    padding: 26px 20px;
+    background: #fff;
+    padding: 26px;
     border-radius: 14px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: inherit;
     border-left: 6px solid #4a6cf7;
 }
 
 .card-item i {
     font-size: 38px;
-    margin-bottom: 10px;
     color: #4a6cf7;
 }
 
 .card-item h3 {
-    font-size: 19px;
-    margin-bottom: 6px;
+    margin: 10px 0;
 }
 
 .card-item p {
@@ -179,32 +201,16 @@ header {
     font-weight: bold;
 }
 
-/* =================================================================================
-   RESPONSIVIDADE REAL (AJUSTADA)
-================================================================================= */
+/* ================= RESPONSIVO ================= */
 
-/* ======= ATÉ 1024px ======= */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 220px;
-    }
-
-    .main-content {
-        margin-left: 220px;
-        padding: 20px;
-    }
-}
-
-/* ======= ATÉ 768px (TABLET) ======= */
+/* TABLET */
 @media (max-width: 768px) {
-    body {
-        flex-direction: column;
+    .topbar {
+        display: flex;
     }
 
     .sidebar {
         left: -260px;
-        width: 260px;
-        box-shadow: 4px 0 15px rgba(0,0,0,0.4);
     }
 
     .sidebar.open {
@@ -213,45 +219,21 @@ header {
 
     .main-content {
         margin-left: 0;
-        padding: 18px;
+        padding-top: 80px;
     }
 
     header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+        display: none;
     }
 }
 
-/* ======= ATÉ 480px (CELULAR) ======= */
+/* MOBILE */
 @media (max-width: 480px) {
-
-    header {
-        padding: 15px;
-    }
-
-    .content-box {
-        padding: 15px;
-    }
-
     .cards-dashboard {
         grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .card-item {
-        padding: 18px;
-    }
-
-    .card-item i {
-        font-size: 30px;
-    }
-
-    .card-item h3 {
-        font-size: 17px;
     }
 
     .card-item p {
-        font-size: 21px;
+        font-size: 22px;
     }
 }
