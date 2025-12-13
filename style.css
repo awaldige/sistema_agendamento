@@ -9,6 +9,8 @@
 body {
     background: #f3f6fb;
     display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* ================ SIDEBAR ================ */
@@ -17,11 +19,13 @@ body {
     height: 100vh;
     background: #1e1f26;
     position: fixed;
+    left: 0;
+    top: 0;
     padding: 20px 15px;
     display: flex;
     flex-direction: column;
-    transition: 0.3s;
-    z-index: 100;
+    transition: 0.3s ease;
+    z-index: 1000;
 }
 
 .sidebar.collapsed {
@@ -110,14 +114,14 @@ body {
     margin-left: 260px;
     padding: 25px;
     width: 100%;
-    transition: 0.3s;
+    transition: 0.3s ease;
 }
 
 .sidebar.collapsed ~ .main-content {
     margin-left: 80px;
 }
 
-/* HEADER */
+/* ================ HEADER ================ */
 header {
     background: #fff;
     padding: 20px;
@@ -126,6 +130,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 15px;
 }
 
 .user-info {
@@ -136,7 +141,7 @@ header {
     color: #2c3e50;
 }
 
-/* CONTENT BOX */
+/* ================ CONTENT BOX ================ */
 .content-box {
     background: #fff;
     padding: 25px;
@@ -194,32 +199,30 @@ header {
 }
 
 /* =================================================================================
-   RESPONSIVIDADE
+   RESPONSIVIDADE REAL
 ================================================================================= */
 
-/* ======= TELAS MENORES QUE 1024PX ======= */
+/* ======= ATÉ 1024px ======= */
 @media (max-width: 1024px) {
+    .sidebar {
+        width: 220px;
+    }
+
     .main-content {
         margin-left: 220px;
         padding: 20px;
     }
-
-    .sidebar {
-        width: 220px;
-    }
 }
 
-/* ======= TELAS MENORES QUE 768PX (TABLET) ======= */
+/* ======= ATÉ 768px (TABLET) ======= */
 @media (max-width: 768px) {
     body {
         flex-direction: column;
     }
 
     .sidebar {
-        position: fixed;
-        width: 200px;
-        height: 100vh;
-        left: -200px;
+        left: -260px;
+        width: 260px;
     }
 
     .sidebar.open {
@@ -228,30 +231,17 @@ header {
 
     .main-content {
         margin-left: 0;
-        width: 100%;
+        padding: 20px;
     }
 
     header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
-    }
-
-    .toggle-btn {
-        display: block;
     }
 }
 
-/* ======= TELAS MENORES QUE 480PX (CELULAR) ======= */
+/* ======= ATÉ 480px (CELULAR) ======= */
 @media (max-width: 480px) {
-    .sidebar {
-        width: 180px;
-    }
-
-    header {
-        padding: 15px;
-    }
-
     .content-box {
         padding: 15px;
     }
@@ -261,10 +251,18 @@ header {
     }
 
     .card-item {
-        padding: 22px 18px;
+        padding: 20px;
     }
 
     .card-item i {
-        font-size: 34px;
+        font-size: 32px;
+    }
+
+    .card-item h3 {
+        font-size: 18px;
+    }
+
+    .card-item p {
+        font-size: 22px;
     }
 }
