@@ -237,3 +237,63 @@ header {
         font-size: 22px;
     }
 }
+/* ================= MOBILE HEADER ================= */
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #1e1f26;
+    color: #fff;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    z-index: 2000;
+}
+
+.mobile-header button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.mobile-title {
+    font-weight: 600;
+}
+
+.mobile-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+/* ================= RESPONSIVO ================= */
+
+@media (max-width: 768px) {
+    .mobile-header {
+        display: flex;
+    }
+
+    .desktop-header {
+        display: none;
+    }
+
+    .sidebar {
+        left: -260px;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding-top: 80px;
+    }
+}
+
