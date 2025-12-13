@@ -85,7 +85,6 @@ body {
 .menu a:hover {
     background: #4a4e69;
     color: #fff;
-    transform: translateX(5px);
 }
 
 /* ================ LOGOUT ================ */
@@ -102,11 +101,6 @@ body {
     color: #fff;
     border-radius: 6px;
     text-decoration: none;
-    transition: 0.2s;
-}
-
-.logout-btn:hover {
-    background: #a51111;
 }
 
 /* ================ MAIN CONTENT ================ */
@@ -138,7 +132,6 @@ header {
     align-items: center;
     gap: 8px;
     font-weight: 500;
-    color: #2c3e50;
 }
 
 /* ================ CONTENT BOX ================ */
@@ -146,7 +139,6 @@ header {
     background: #fff;
     padding: 25px;
     border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 /* ================ CARDS DASHBOARD ================ */
@@ -159,47 +151,36 @@ header {
 
 .card-item {
     background: #ffffff;
-    padding: 28px 22px;
+    padding: 26px 20px;
     border-radius: 14px;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: .25s ease;
-    cursor: pointer;
     text-decoration: none;
     color: inherit;
     border-left: 6px solid #4a6cf7;
 }
 
 .card-item i {
-    font-size: 40px;
-    margin-bottom: 12px;
+    font-size: 38px;
+    margin-bottom: 10px;
     color: #4a6cf7;
 }
 
 .card-item h3 {
-    font-size: 20px;
-    margin-bottom: 8px;
-    font-weight: 600;
+    font-size: 19px;
+    margin-bottom: 6px;
 }
 
 .card-item p {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: bold;
-    color: #222;
-    margin-top: 5px;
-}
-
-.card-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-    border-left-width: 8px;
 }
 
 /* =================================================================================
-   RESPONSIVIDADE REAL
+   RESPONSIVIDADE REAL (AJUSTADA)
 ================================================================================= */
 
 /* ======= ATÉ 1024px ======= */
@@ -223,6 +204,7 @@ header {
     .sidebar {
         left: -260px;
         width: 260px;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.4);
     }
 
     .sidebar.open {
@@ -231,38 +213,45 @@ header {
 
     .main-content {
         margin-left: 0;
-        padding: 20px;
+        padding: 18px;
     }
 
     header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 10px;
     }
 }
 
 /* ======= ATÉ 480px (CELULAR) ======= */
 @media (max-width: 480px) {
+
+    header {
+        padding: 15px;
+    }
+
     .content-box {
         padding: 15px;
     }
 
     .cards-dashboard {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .card-item {
-        padding: 20px;
+        padding: 18px;
     }
 
     .card-item i {
-        font-size: 32px;
+        font-size: 30px;
     }
 
     .card-item h3 {
-        font-size: 18px;
+        font-size: 17px;
     }
 
     .card-item p {
-        font-size: 22px;
+        font-size: 21px;
     }
 }
