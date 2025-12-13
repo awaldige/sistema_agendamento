@@ -8,36 +8,7 @@
 
 body {
     background: #f3f6fb;
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-/* ================ TOPBAR MOBILE ================ */
-.topbar {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: #1e1f26;
-    color: #fff;
-    padding: 0 20px;
-    z-index: 1200;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.topbar h2 {
-    font-size: 18px;
-}
-
-.topbar button {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 24px;
-    cursor: pointer;
+    display: flex;
 }
 
 /* ================ SIDEBAR ================ */
@@ -46,13 +17,11 @@ body {
     height: 100vh;
     background: #1e1f26;
     position: fixed;
-    left: 0;
-    top: 0;
     padding: 20px 15px;
     display: flex;
     flex-direction: column;
-    transition: 0.3s ease;
-    z-index: 1100;
+    transition: 0.3s;
+    z-index: 100;
 }
 
 .sidebar.collapsed {
@@ -112,6 +81,7 @@ body {
 .menu a:hover {
     background: #4a4e69;
     color: #fff;
+    transform: translateX(5px);
 }
 
 /* ================ LOGOUT ================ */
@@ -139,10 +109,15 @@ body {
 .main-content {
     margin-left: 260px;
     padding: 25px;
-    transition: 0.3s ease;
+    width: 100%;
+    transition: 0.3s;
 }
 
-/* ================ HEADER DESKTOP ================ */
+.sidebar.collapsed ~ .main-content {
+    margin-left: 80px;
+}
+
+/* HEADER */
 header {
     background: #fff;
     padding: 20px;
@@ -151,7 +126,6 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
 }
 
 .user-info {
@@ -162,138 +136,10 @@ header {
     color: #2c3e50;
 }
 
-/* ================ CONTENT BOX ================ */
+/* CONTENT BOX */
 .content-box {
     background: #fff;
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
-
-/* ================ CARDS ================ */
-.cards-dashboard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 25px;
-    margin-top: 30px;
-}
-
-.card-item {
-    background: #fff;
-    padding: 26px;
-    border-radius: 14px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.08);
-    text-align: center;
-    border-left: 6px solid #4a6cf7;
-}
-
-.card-item i {
-    font-size: 38px;
-    color: #4a6cf7;
-}
-
-.card-item h3 {
-    margin: 10px 0;
-}
-
-.card-item p {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-/* ================= RESPONSIVO ================= */
-
-/* TABLET */
-@media (max-width: 768px) {
-    .topbar {
-        display: flex;
-    }
-
-    .sidebar {
-        left: -260px;
-    }
-
-    .sidebar.open {
-        left: 0;
-    }
-
-    .main-content {
-        margin-left: 0;
-        padding-top: 80px;
-    }
-
-    header {
-        display: none;
-    }
-}
-
-/* MOBILE */
-@media (max-width: 480px) {
-    .cards-dashboard {
-        grid-template-columns: 1fr;
-    }
-
-    .card-item p {
-        font-size: 22px;
-    }
-}
-/* ================= MOBILE HEADER ================= */
-.mobile-header {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: #1e1f26;
-    color: #fff;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 15px;
-    z-index: 2000;
-}
-
-.mobile-header button {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 22px;
-    cursor: pointer;
-}
-
-.mobile-title {
-    font-weight: 600;
-}
-
-.mobile-user {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-}
-
-/* ================= RESPONSIVO ================= */
-
-@media (max-width: 768px) {
-    .mobile-header {
-        display: flex;
-    }
-
-    .desktop-header {
-        display: none;
-    }
-
-    .sidebar {
-        left: -260px;
-    }
-
-    .sidebar.open {
-        left: 0;
-    }
-
-    .main-content {
-        margin-left: 0;
-        padding-top: 80px;
-    }
-}
-
