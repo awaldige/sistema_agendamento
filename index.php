@@ -109,4 +109,41 @@ $totalMes = $stmtMes->fetchColumn();
     </header>
 
     <section class="content-box">
-        <h2>Visão G
+        <h2>Visão Geral</h2>
+
+        <div class="cards-dashboard">
+
+            <!-- HOJE -->
+            <a href="agendamentos.php?filtro=hoje" class="card-item">
+                <i class="fas fa-clock"></i>
+                <h3>Hoje</h3>
+                <p><?= $totalHoje ?></p>
+            </a>
+
+            <!-- SEMANA -->
+            <a href="agendamentos.php?filtro=semana" class="card-item">
+                <i class="fas fa-calendar-week"></i>
+                <h3>Semana</h3>
+                <p><?= $totalSemana ?></p>
+            </a>
+
+            <!-- MÊS -->
+            <a href="agendamentos.php?filtro=mes" class="card-item">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Mês</h3>
+                <p><?= $totalMes ?></p>
+            </a>
+
+        </div>
+    </section>
+
+</main>
+
+<script>
+document.getElementById('toggleBtn').onclick = () => {
+    document.getElementById('sidebar').classList.toggle('open');
+};
+</script>
+
+</body>
+</html>
