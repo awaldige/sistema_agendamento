@@ -7,6 +7,46 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+/* =============================
+   CONTROLE DE FILTRO
+============================= */
+$filtro = $_GET['filtro'] ?? null;
+$mostrarLista = false;
+$agendamentos = [];
+
+if ($filtro) {
+    $mostrarLista = true;
+
+    switch ($filtro) {
+
+        case 'hoje':
+            $sql = "SELECT * FROM agendamentos WHERE data = CURDATE() ORDER BY data ASC";
+            break;
+
+        case 'semana':
+            $sql = "SELECT * FROM agendamentos
+                    WHERE data BETWEEN
+                    DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                    AND DATE_ADD(CURDATE(), INTERVAL (6 - WEEKDAY(CURDATE())) DAY)
+                    ORDER BY data ASC";
+            break;
+
+        case 'mes':
+            $sql = "SELECT * FROM agendamentos
+                    WHERE MONTH(data) = MONTH(CURDATE())
+                    AND YEAR(data) = YEAR(CURDATE())
+                    ORDER BY data ASC";
+            break;
+
+        default:
+            $sql = "SELECT * FROM agendamentos ORDER BY data ASC";
+    }
+
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -25,19 +65,19 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 80px auto;
             background: #fff;
             padding: 40px;
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            text-align: center;
         }
 
         h2 {
             font-weight: 600;
             color: #2c3e50;
             margin-bottom: 25px;
+            text-align: center;
         }
 
         .voltar {
@@ -47,7 +87,7 @@ if (!isset($_SESSION['user_id'])) {
             color: #fff;
             border-radius: 8px;
             text-decoration: none;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .voltar:hover {
@@ -56,33 +96,93 @@ if (!isset($_SESSION['user_id'])) {
 
         .btn-novo {
             display: inline-block;
-            padding: 15px 25px;
+            padding: 12px 20px;
             background: #4a6cf7;
             color: #fff;
             border-radius: 10px;
             text-decoration: none;
-            font-size: 18px;
             font-weight: 500;
+            margin-bottom: 25px;
         }
 
         .btn-novo:hover {
             background: #2649f5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        .vazio {
+            text-align: center;
+            color: #999;
+            padding: 20px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <a href="index.php" class="voltar">← Voltar</a>
+    <a href="index.php" class="voltar">← Voltar</a>
+
+    <?php if ($mostrarLista): ?>
 
         <h2>Agendamentos</h2>
 
-        <a href="novo_agendamento.php" class="btn-novo">+ Novo Agendamento</a>
+        <?php if (count($agendamentos) > 0): ?>
 
-    </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($agendamentos as $a): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($a['cliente']) ?></td>
+                            <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
+                            <td><?= htmlspecialchars($a['status']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+        <?php else: ?>
+            <p class="vazio">Nenhum agendamento encontrado.</p>
+        <?php endif; ?>
+
+        <br>
+        <a href="agendamentos.php" class="btn-novo">+ Novo Agendamento</a>
+
+    <?php else: ?>
+
+        <h2>Agendamentos</h2>
+
+        <div style="text-align:center;">
+            <a href="novo_agendamento.php" class="btn-novo">+ Novo Agendamento</a>
+        </div>
+
+    <?php endif; ?>
+
+</div>
 
 </body>
-
 </html>
