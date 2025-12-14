@@ -189,4 +189,10 @@ header {
         display: none;
     }
 }
+/* Bloqueia scroll quando menu mobile está aberto */
+body.no-scroll {
+    overflow: hidden;
+}
+
+
 
