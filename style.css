@@ -193,6 +193,23 @@ header {
 body.no-scroll {
     overflow: hidden;
 }
+/* GARANTE QUE OS CARDS RECEBAM CLIQUE */
+.card-item {
+    position: relative;
+    z-index: 1;
+}
+
+/* Sidebar só captura clique quando aberta */
+@media (max-width: 768px) {
+    .sidebar {
+        pointer-events: none;
+    }
+
+    .sidebar.open {
+        pointer-events: auto;
+    }
+}
+
 
 
 
