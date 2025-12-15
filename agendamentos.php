@@ -7,41 +7,58 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-/* CONTROLE DE FILTRO */
+/* =============================
+   CONTROLE DE FILTROS
+============================= */
+
 $filtro = $_GET['filtro'] ?? null;
+$mesSelecionado = $_GET['mes'] ?? null;
+
 $mostrarLista = false;
 $agendamentos = [];
 
-if ($filtro) {
+$where = "";
+$params = [];
+
+/* HOJE */
+if ($filtro === 'hoje') {
+    $mostrarLista = true;
+    $where = "WHERE data = CURDATE()";
+}
+
+/* SEMANA */
+elseif ($filtro === 'semana') {
+    $mostrarLista = true;
+    $where = "WHERE data BETWEEN
+              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+              AND DATE_ADD(CURDATE(), INTERVAL (6 - WEEKDAY(CURDATE())) DAY)";
+}
+
+/* MÊS ATUAL */
+elseif ($filtro === 'mes') {
+    $mostrarLista = true;
+    $where = "WHERE MONTH(data) = MONTH(CURDATE())
+              AND YEAR(data) = YEAR(CURDATE())";
+}
+
+/* 🔥 MÊS SELECIONADO */
+elseif (!empty($mesSelecionado)) {
     $mostrarLista = true;
 
-    switch ($filtro) {
+    [$ano, $mes] = explode('-', $mesSelecionado);
 
-        case 'hoje':
-            $sql = "SELECT * FROM agendamentos WHERE data = CURDATE() ORDER BY hora";
-            break;
+    $where = "WHERE MONTH(data) = :mes AND YEAR(data) = :ano";
+    $params = [
+        ':mes' => $mes,
+        ':ano' => $ano
+    ];
+}
 
-        case 'semana':
-            $sql = "SELECT * FROM agendamentos
-                    WHERE data BETWEEN
-                    DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-                    AND DATE_ADD(CURDATE(), INTERVAL (6 - WEEKDAY(CURDATE())) DAY)
-                    ORDER BY data, hora";
-            break;
-
-        case 'mes':
-            $sql = "SELECT * FROM agendamentos
-                    WHERE MONTH(data) = MONTH(CURDATE())
-                    AND YEAR(data) = YEAR(CURDATE())
-                    ORDER BY data, hora";
-            break;
-
-        default:
-            $sql = "SELECT * FROM agendamentos ORDER BY data, hora";
-    }
-
+/* EXECUTA QUERY */
+if ($mostrarLista) {
+    $sql = "SELECT * FROM agendamentos $where ORDER BY data ASC, hora ASC";
     $stmt = $conn->prepare($sql);
-    $stmt->execute();
+    $stmt->execute($params);
     $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
@@ -55,10 +72,10 @@ if ($filtro) {
 <style>
 body {
     background: #eef2f7;
-    font-family: Poppins, sans-serif;
+    font-family: "Poppins", sans-serif;
 }
 .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 60px auto;
     background: #fff;
     padding: 40px;
@@ -84,13 +101,47 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 20px;
 }
 th, td {
     padding: 12px;
     border-bottom: 1px solid #ddd;
+    text-align: left;
 }
 th {
     background: #f4f6f9;
+}
+
+/* FILTRO MÊS */
+.filtro-mes {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+.filtro-mes label {
+    font-weight: 500;
+}
+.filtro-mes input {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+.filtro-mes button {
+    background: #4a6cf7;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.filtro-mes a {
+    background: #7f8c8d;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
 }
 </style>
 </head>
@@ -102,6 +153,16 @@ th {
 <a href="index.php" class="voltar">← Voltar</a>
 
 <h2>Agendamentos</h2>
+
+<!-- 🔎 FILTRO POR MÊS -->
+<form method="GET" class="filtro-mes">
+    <label>Mês:</label>
+    <input type="month" name="mes" value="<?= htmlspecialchars($mesSelecionado ?? '') ?>">
+    <button type="submit">Buscar</button>
+    <a href="agendamentos.php">Limpar</a>
+</form>
+
+<a href="novo_agendamento.php" class="btn-novo">+ Novo Agendamento</a>
 
 <?php if ($mostrarLista): ?>
 
@@ -119,7 +180,7 @@ th {
         <tbody>
         <?php foreach ($agendamentos as $a): ?>
             <tr>
-                <td><?= htmlspecialchars($a['paciente'] ?? '') ?></td>
+                <td><?= htmlspecialchars($a['paciente']) ?></td>
                 <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
                 <td><?= substr($a['hora'], 0, 5) ?></td>
                 <td><?= ucfirst(htmlspecialchars($a['tipo_consulta'])) ?></td>
@@ -131,12 +192,6 @@ th {
     <?php else: ?>
         <p>Nenhum agendamento encontrado.</p>
     <?php endif; ?>
-
-    <a href="agendamentos.php" class="btn-novo">+ Novo Agendamento</a>
-
-<?php else: ?>
-
-    <a href="novo_agendamento.php" class="btn-novo">+ Novo Agendamento</a>
 
 <?php endif; ?>
 
