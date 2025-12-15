@@ -15,8 +15,9 @@ $filtro = $_GET['filtro'] ?? null;
 $mesSelecionado = $_GET['mes'] ?? null;
 
 $mostrarLista = false;
-$agendamentos = [];
+$mostrarFiltroMes = false;
 
+$agendamentos = [];
 $where = "";
 $params = [];
 
@@ -34,24 +35,23 @@ elseif ($filtro === 'semana') {
               AND DATE_ADD(CURDATE(), INTERVAL (6 - WEEKDAY(CURDATE())) DAY)";
 }
 
-/* MÊS ATUAL */
+/* MÊS */
 elseif ($filtro === 'mes') {
     $mostrarLista = true;
-    $where = "WHERE MONTH(data) = MONTH(CURDATE())
-              AND YEAR(data) = YEAR(CURDATE())";
-}
+    $mostrarFiltroMes = true;
 
-/* 🔥 MÊS SELECIONADO */
-elseif (!empty($mesSelecionado)) {
-    $mostrarLista = true;
-
-    [$ano, $mes] = explode('-', $mesSelecionado);
-
-    $where = "WHERE MONTH(data) = :mes AND YEAR(data) = :ano";
-    $params = [
-        ':mes' => $mes,
-        ':ano' => $ano
-    ];
+    /* Mês selecionado OU mês atual */
+    if (!empty($mesSelecionado)) {
+        [$ano, $mes] = explode('-', $mesSelecionado);
+        $where = "WHERE MONTH(data) = :mes AND YEAR(data) = :ano";
+        $params = [
+            ':mes' => $mes,
+            ':ano' => $ano
+        ];
+    } else {
+        $where = "WHERE MONTH(data) = MONTH(CURDATE())
+                  AND YEAR(data) = YEAR(CURDATE())";
+    }
 }
 
 /* EXECUTA QUERY */
@@ -106,7 +106,6 @@ table {
 th, td {
     padding: 12px;
     border-bottom: 1px solid #ddd;
-    text-align: left;
 }
 th {
     background: #f4f6f9;
@@ -154,13 +153,22 @@ th {
 
 <h2>Agendamentos</h2>
 
-<!-- 🔎 FILTRO POR MÊS -->
+<!-- 🔎 FILTRO POR MÊS (SOMENTE NO CONTEXTO MÊS) -->
+<?php if ($mostrarFiltroMes): ?>
 <form method="GET" class="filtro-mes">
+    <input type="hidden" name="filtro" value="mes">
+
     <label>Mês:</label>
-    <input type="month" name="mes" value="<?= htmlspecialchars($mesSelecionado ?? '') ?>">
+    <input
+        type="month"
+        name="mes"
+        value="<?= htmlspecialchars($mesSelecionado ?? date('Y-m')) ?>">
+
     <button type="submit">Buscar</button>
-    <a href="agendamentos.php">Limpar</a>
+
+    <a href="agendamentos.php?filtro=mes">Mês Atual</a>
 </form>
+<?php endif; ?>
 
 <a href="novo_agendamento.php" class="btn-novo">+ Novo Agendamento</a>
 
