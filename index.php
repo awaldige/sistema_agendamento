@@ -48,164 +48,122 @@ $totalMes = $stmtMes->fetchColumn();
 <head>
 <meta charset="UTF-8">
 <title>Painel Administrativo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<style>
-body {
-    margin: 0;
-    background: #eef2f7;
-    font-family: 'Poppins', sans-serif;
-}
-
-.dashboard {
-    max-width: 1200px;
-    margin: 60px auto;
-    padding: 0 20px;
-}
-
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 35px;
-}
-
-.dashboard-header h1 {
-    font-size: 28px;
-    color: #2c3e50;
-}
-
-.user-info {
-    font-size: 14px;
-    color: #555;
-}
-
-.dashboard-overview {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 25px;
-}
-
-.overview-card {
-    background: #fff;
-    border-radius: 20px;
-    padding: 26px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    text-decoration: none;
-    color: #2c3e50;
-    box-shadow: 0 10px 25px rgba(0,0,0,.08);
-    transition: .3s ease;
-}
-
-.overview-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(0,0,0,.15);
-}
-
-.icon {
-    width: 62px;
-    height: 62px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    color: #fff;
-}
-
-.today .icon {
-    background: linear-gradient(135deg, #f39c12, #f1c40f);
-}
-
-.week .icon {
-    background: linear-gradient(135deg, #4a6cf7, #6a8bff);
-}
-
-.month .icon {
-    background: linear-gradient(135deg, #27ae60, #2ecc71);
-}
-
-.info span {
-    font-size: 14px;
-    color: #7f8c8d;
-}
-
-.info strong {
-    display: block;
-    font-size: 34px;
-    margin: 4px 0;
-}
-
-.info small {
-    font-size: 13px;
-    color: #95a5a6;
-}
-
-/* Responsivo */
-@media (max-width: 600px) {
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-}
-</style>
 </head>
 
 <body>
 
-<div class="dashboard">
+<!-- HEADER MOBILE -->
+<header class="topbar-mobile">
+    <button id="toggleBtn"><i class="fas fa-bars"></i></button>
+    <span>Admin</span>
+</header>
 
-    <header class="dashboard-header">
-        <h1>Visão Geral</h1>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>Admin</h2>
+    </div>
+
+    <ul class="menu">
+        <li>
+            <a href="index.php" class="active">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="agendamentos.php">
+                <i class="fas fa-calendar-check"></i>
+                <span>Agendamentos</span>
+            </a>
+        </li>
+        <li>
+            <a href="servicos.php">
+                <i class="fas fa-briefcase"></i>
+                <span>Serviços</span>
+            </a>
+        </li>
+        <li>
+            <a href="usuarios.php">
+                <i class="fas fa-users"></i>
+                <span>Usuários</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="logout-box">
+        <a class="logout-btn" href="logout.php">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Sair</span>
+        </a>
+    </div>
+</aside>
+
+<!-- CONTEÚDO -->
+<main class="main-content">
+
+    <!-- HEADER DESKTOP -->
+    <header class="desktop-header">
+        <h1>Painel Administrativo</h1>
         <div class="user-info">
             <i class="fas fa-user-circle"></i>
             <?= htmlspecialchars($nomeUsuario) ?>
         </div>
     </header>
 
-    <section class="dashboard-overview">
+    <!-- VISÃO GERAL -->
+    <section class="content-box">
+        <h2>Visão Geral</h2>
 
-        <a href="agendamentos.php?filtro=hoje" class="overview-card today">
-            <div class="icon">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div class="info">
-                <span>Hoje</span>
-                <strong><?= $totalHoje ?></strong>
-                <small>Agendamentos</small>
-            </div>
-        </a>
+        <div class="dashboard-overview">
 
-        <a href="agendamentos.php?filtro=semana" class="overview-card week">
-            <div class="icon">
-                <i class="fas fa-calendar-week"></i>
-            </div>
-            <div class="info">
-                <span>Semana</span>
-                <strong><?= $totalSemana ?></strong>
-                <small>Agendamentos</small>
-            </div>
-        </a>
+            <a href="agendamentos.php?filtro=hoje" class="overview-card today">
+                <div class="icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="info">
+                    <span>Hoje</span>
+                    <strong><?= $totalHoje ?></strong>
+                    <small>Agendamentos</small>
+                </div>
+            </a>
 
-        <a href="agendamentos.php?filtro=mes" class="overview-card month">
-            <div class="icon">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <div class="info">
-                <span>Mês</span>
-                <strong><?= $totalMes ?></strong>
-                <small>Agendamentos</small>
-            </div>
-        </a>
+            <a href="agendamentos.php?filtro=semana" class="overview-card week">
+                <div class="icon">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="info">
+                    <span>Semana</span>
+                    <strong><?= $totalSemana ?></strong>
+                    <small>Agendamentos</small>
+                </div>
+            </a>
 
+            <a href="agendamentos.php?filtro=mes" class="overview-card month">
+                <div class="icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="info">
+                    <span>Mês</span>
+                    <strong><?= $totalMes ?></strong>
+                    <small>Agendamentos</small>
+                </div>
+            </a>
+
+        </div>
     </section>
 
-</div>
+</main>
+
+<script>
+document.getElementById('toggleBtn').onclick = () => {
+    document.getElementById('sidebar').classList.toggle('open');
+};
+</script>
 
 </body>
 </html>
