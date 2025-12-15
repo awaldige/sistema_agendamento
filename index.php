@@ -2,6 +2,7 @@
 session_start();
 require_once 'conexao.php';
 
+// Proteção
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -15,12 +16,12 @@ $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
 $hoje = date("Y-m-d");
 
-/* HOJE */
+/* Hoje */
 $stmtHoje = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data = :hoje");
 $stmtHoje->execute([':hoje' => $hoje]);
 $totalHoje = $stmtHoje->fetchColumn();
 
-/* SEMANA */
+/* Semana */
 $semanaInicio = date("Y-m-d", strtotime("monday this week"));
 $semanaFim    = date("Y-m-d", strtotime("sunday this week"));
 
@@ -31,7 +32,7 @@ $stmtSemana->execute([
 ]);
 $totalSemana = $stmtSemana->fetchColumn();
 
-/* MÊS */
+/* Mês */
 $mesInicio = date("Y-m-01");
 $mesFim    = date("Y-m-t");
 
@@ -46,104 +47,165 @@ $totalMes = $stmtMes->fetchColumn();
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel Administrativo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+    margin: 0;
+    background: #eef2f7;
+    font-family: 'Poppins', sans-serif;
+}
+
+.dashboard {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.dashboard-header h1 {
+    font-size: 28px;
+    color: #2c3e50;
+}
+
+.user-info {
+    font-size: 14px;
+    color: #555;
+}
+
+.dashboard-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+.overview-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 26px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-decoration: none;
+    color: #2c3e50;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    transition: .3s ease;
+}
+
+.overview-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0,0,0,.15);
+}
+
+.icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #fff;
+}
+
+.today .icon {
+    background: linear-gradient(135deg, #f39c12, #f1c40f);
+}
+
+.week .icon {
+    background: linear-gradient(135deg, #4a6cf7, #6a8bff);
+}
+
+.month .icon {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.info span {
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.info strong {
+    display: block;
+    font-size: 34px;
+    margin: 4px 0;
+}
+
+.info small {
+    font-size: 13px;
+    color: #95a5a6;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+</style>
 </head>
 
 <body>
 
-<!-- HEADER MOBILE -->
-<header class="topbar-mobile">
-    <button id="toggleBtn"><i class="fas fa-bars"></i></button>
-    <span>Admin</span>
-</header>
+<div class="dashboard">
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <h2>Admin</h2>
-    </div>
-
-    <ul class="menu">
-        <li>
-            <a href="index.php">
-                <i class="fas fa-chart-line"></i><span>Dashboard</span>
-            </a>
-        </li>
-        <li>
-            <a href="agendamentos.php">
-                <i class="fas fa-calendar-check"></i><span>Agendamentos</span>
-            </a>
-        </li>
-        <li>
-            <a href="servicos.php">
-                <i class="fas fa-briefcase"></i><span>Serviços</span>
-            </a>
-        </li>
-        <li>
-            <a href="usuarios.php">
-                <i class="fas fa-users"></i><span>Usuários</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="logout-box">
-        <a class="logout-btn" href="logout.php">
-            <i class="fas fa-sign-out-alt"></i><span>Sair</span>
-        </a>
-    </div>
-</aside>
-
-<!-- CONTEÚDO -->
-<main class="main-content">
-
-    <header class="desktop-header">
-        <h1>Bem-vindo ao Painel</h1>
+    <header class="dashboard-header">
+        <h1>Visão Geral</h1>
         <div class="user-info">
             <i class="fas fa-user-circle"></i>
             <?= htmlspecialchars($nomeUsuario) ?>
         </div>
     </header>
 
-    <section class="content-box">
-        <h2>Visão Geral</h2>
+    <section class="dashboard-overview">
 
-        <div class="cards-dashboard">
-
-            <!-- HOJE -->
-            <a href="agendamentos.php?filtro=hoje" class="card-item">
+        <a href="agendamentos.php?filtro=hoje" class="overview-card today">
+            <div class="icon">
                 <i class="fas fa-clock"></i>
-                <h3>Hoje</h3>
-                <p><?= $totalHoje ?></p>
-            </a>
+            </div>
+            <div class="info">
+                <span>Hoje</span>
+                <strong><?= $totalHoje ?></strong>
+                <small>Agendamentos</small>
+            </div>
+        </a>
 
-            <!-- SEMANA -->
-            <a href="agendamentos.php?filtro=semana" class="card-item">
+        <a href="agendamentos.php?filtro=semana" class="overview-card week">
+            <div class="icon">
                 <i class="fas fa-calendar-week"></i>
-                <h3>Semana</h3>
-                <p><?= $totalSemana ?></p>
-            </a>
+            </div>
+            <div class="info">
+                <span>Semana</span>
+                <strong><?= $totalSemana ?></strong>
+                <small>Agendamentos</small>
+            </div>
+        </a>
 
-            <!-- MÊS -->
-            <a href="agendamentos.php?filtro=mes" class="card-item">
+        <a href="agendamentos.php?filtro=mes" class="overview-card month">
+            <div class="icon">
                 <i class="fas fa-calendar-alt"></i>
-                <h3>Mês</h3>
-                <p><?= $totalMes ?></p>
-            </a>
+            </div>
+            <div class="info">
+                <span>Mês</span>
+                <strong><?= $totalMes ?></strong>
+                <small>Agendamentos</small>
+            </div>
+        </a>
 
-        </div>
     </section>
 
-</main>
-
-<script>
-document.getElementById('toggleBtn').onclick = () => {
-    document.getElementById('sidebar').classList.toggle('open');
-};
-</script>
+</div>
 
 </body>
 </html>
