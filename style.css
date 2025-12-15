@@ -74,14 +74,15 @@ body {
     font-size: 18px;
 }
 
-.sidebar.collapsed a span {
-    display: none;
-}
-
 .menu a:hover {
     background: #4a4e69;
     color: #fff;
     transform: translateX(5px);
+}
+
+.menu a.active {
+    background: #4a6cf7;
+    color: #fff;
 }
 
 /* ================ LOGOUT ================ */
@@ -117,7 +118,7 @@ body {
     margin-left: 80px;
 }
 
-/* HEADER */
+/* ================ HEADER ================ */
 header {
     background: #fff;
     padding: 20px;
@@ -136,58 +137,64 @@ header {
     color: #2c3e50;
 }
 
-/* CONTENT BOX */
+/* ================ CONTENT BOX ================ */
 .content-box {
     background: #fff;
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
+
 /* ==========================
    VISÃO GERAL – DASHBOARD
-   (ALINHADO AO LAYOUT ATUAL)
 ========================== */
 
 .dashboard-overview {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+    gap: 18px;
     margin-top: 20px;
 }
 
-.overview-card {
+/* Card base */
+.dashboard-overview a.overview-card {
     background: #f9fafc;
     border: 1px solid #e1e6ef;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 18px 20px;
+
     display: flex;
     align-items: center;
     gap: 14px;
+
     text-decoration: none;
     color: #2c3e50;
-    transition: 0.2s ease;
+
+    transition: box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.overview-card:hover {
+/* Hover elegante */
+.dashboard-overview a.overview-card:hover {
     background: #ffffff;
-    border-color: #cfd6e4;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
 
-/* Ícone discreto */
+/* Ícone */
 .overview-card .icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     font-size: 18px;
     color: #fff;
     flex-shrink: 0;
 }
 
-/* Cores suaves (sem gradiente) */
+/* Cores */
 .overview-card.today .icon {
     background: #f0ad4e;
 }
@@ -209,7 +216,7 @@ header {
 
 .overview-card .info strong {
     display: block;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 600;
     margin: 2px 0;
     color: #2c3e50;
@@ -220,10 +227,23 @@ header {
     color: #95a5a6;
 }
 
-/* Mobile */
+/* ================ RESPONSIVO ================ */
+@media (max-width: 768px) {
+    .sidebar {
+        left: -260px;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+}
+
 @media (max-width: 600px) {
     .overview-card {
         padding: 16px;
     }
 }
-
