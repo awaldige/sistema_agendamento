@@ -1,14 +1,22 @@
 <?php
 
-$host = getenv("DB_HOST");
-$port = getenv("DB_PORT") ?: 3306;
-$user = getenv("DB_USER");
-$pass = getenv("DB_PASS");
-$db   = getenv("DB_NAME");
+$databaseUrl = getenv("DATABASE_URL");
+
+if (!$databaseUrl) {
+    die("DATABASE_URL não configurada no Render.");
+}
+
+$parts = parse_url($databaseUrl);
+
+$host = $parts['host'];
+$port = $parts['port'];
+$user = $parts['user'];
+$pass = $parts['pass'];
+$db   = ltrim($parts['path'], '/');
 
 try {
     $conn = new PDO(
-        "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4",
+        "pgsql:host=$host;port=$port;dbname=$db",
         $user,
         $pass,
         [
