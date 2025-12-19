@@ -24,15 +24,16 @@ $params = [];
 /* HOJE */
 if ($filtro === 'hoje') {
     $mostrarLista = true;
-    $where = "WHERE data = CURDATE()";
+    $where = "WHERE data = CURRENT_DATE";
 }
 
 /* SEMANA */
 elseif ($filtro === 'semana') {
     $mostrarLista = true;
     $where = "WHERE data BETWEEN
-              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-              AND DATE_ADD(CURDATE(), INTERVAL (6 - WEEKDAY(CURDATE())) DAY)";
+        (CURRENT_DATE - INTERVAL '1 day' * EXTRACT(DOW FROM CURRENT_DATE))
+        AND
+        (CURRENT_DATE + INTERVAL '1 day' * (6 - EXTRACT(DOW FROM CURRENT_DATE)))";
 }
 
 /* MÊS */
@@ -40,23 +41,32 @@ elseif ($filtro === 'mes') {
     $mostrarLista = true;
     $mostrarFiltroMes = true;
 
-    /* Mês selecionado OU mês atual */
+    /* MÊS SELECIONADO */
     if (!empty($mesSelecionado)) {
         [$ano, $mes] = explode('-', $mesSelecionado);
-        $where = "WHERE MONTH(data) = :mes AND YEAR(data) = :ano";
+
+        $where = "WHERE EXTRACT(MONTH FROM data) = :mes
+                  AND EXTRACT(YEAR FROM data) = :ano";
+
         $params = [
-            ':mes' => $mes,
-            ':ano' => $ano
+            ':mes' => (int)$mes,
+            ':ano' => (int)$ano
         ];
-    } else {
-        $where = "WHERE MONTH(data) = MONTH(CURDATE())
-                  AND YEAR(data) = YEAR(CURDATE())";
+    }
+    /* MÊS ATUAL */
+    else {
+        $where = "WHERE EXTRACT(MONTH FROM data) = EXTRACT(MONTH FROM CURRENT_DATE)
+                  AND EXTRACT(YEAR FROM data) = EXTRACT(YEAR FROM CURRENT_DATE)";
     }
 }
 
 /* EXECUTA QUERY */
 if ($mostrarLista) {
-    $sql = "SELECT * FROM agendamentos $where ORDER BY data ASC, hora ASC";
+    $sql = "SELECT *
+            FROM agendamentos
+            $where
+            ORDER BY data ASC, hora ASC";
+
     $stmt = $conn->prepare($sql);
     $stmt->execute($params);
     $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -153,7 +163,7 @@ th {
 
 <h2>Agendamentos</h2>
 
-<!-- 🔎 FILTRO POR MÊS (SOMENTE NO CONTEXTO MÊS) -->
+<!-- 🔎 FILTRO POR MÊS (APENAS QUANDO filtro=mes) -->
 <?php if ($mostrarFiltroMes): ?>
 <form method="GET" class="filtro-mes">
     <input type="hidden" name="filtro" value="mes">
