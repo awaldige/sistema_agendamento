@@ -99,15 +99,6 @@ body {
     padding: 10px 15px;
     border-radius: 8px;
 }
-.btn-novo {
-    display: inline-block;
-    margin: 20px 0;
-    padding: 12px 20px;
-    background: #4a6cf7;
-    color: #fff;
-    border-radius: 10px;
-    text-decoration: none;
-}
 table {
     width: 100%;
     border-collapse: collapse;
@@ -163,7 +154,7 @@ th {
 
 <h2>Agendamentos</h2>
 
-<!-- 🔎 FILTRO POR MÊS (APENAS QUANDO filtro=mes) -->
+<!-- 🔎 FILTRO POR MÊS -->
 <?php if ($mostrarFiltroMes): ?>
 <form method="GET" class="filtro-mes">
     <input type="hidden" name="filtro" value="mes">
@@ -179,8 +170,6 @@ th {
     <a href="agendamentos.php?filtro=mes">Mês Atual</a>
 </form>
 <?php endif; ?>
-
-<a href="novo_agendamento.php" class="btn-novo">+ Novo Agendamento</a>
 
 <?php if ($mostrarLista): ?>
 
