@@ -14,6 +14,12 @@ if (!isset($_SESSION['user_id'])) {
 $filtro = $_GET['filtro'] ?? null;
 $mesSelecionado = $_GET['mes'] ?? null;
 
+/* 🚀 SEM FILTRO → ABRE FORMULÁRIO */
+if ($filtro === null) {
+    header("Location: novo_agendamento.php");
+    exit();
+}
+
 $mostrarLista = false;
 $mostrarFiltroMes = false;
 
@@ -21,13 +27,17 @@ $agendamentos = [];
 $where = "";
 $params = [];
 
-/* HOJE */
+/* =============================
+   HOJE
+============================= */
 if ($filtro === 'hoje') {
     $mostrarLista = true;
     $where = "WHERE data = CURRENT_DATE";
 }
 
-/* SEMANA */
+/* =============================
+   SEMANA
+============================= */
 elseif ($filtro === 'semana') {
     $mostrarLista = true;
     $where = "WHERE data BETWEEN
@@ -36,7 +46,9 @@ elseif ($filtro === 'semana') {
         (CURRENT_DATE + INTERVAL '1 day' * (6 - EXTRACT(DOW FROM CURRENT_DATE)))";
 }
 
-/* MÊS */
+/* =============================
+   MÊS
+============================= */
 elseif ($filtro === 'mes') {
     $mostrarLista = true;
     $mostrarFiltroMes = true;
@@ -60,7 +72,9 @@ elseif ($filtro === 'mes') {
     }
 }
 
-/* EXECUTA QUERY */
+/* =============================
+   EXECUTA QUERY
+============================= */
 if ($mostrarLista) {
     $sql = "SELECT *
             FROM agendamentos
