@@ -2,7 +2,6 @@
 session_start();
 require_once 'conexao.php';
 
-// Proteção
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -10,167 +9,66 @@ if (!isset($_SESSION['user_id'])) {
 
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
-/* =============================
-   TOTAIS DE AGENDAMENTOS
-============================= */
-
 $hoje = date("Y-m-d");
 
-/* Hoje */
-$stmtHoje = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data = :hoje");
-$stmtHoje->execute([':hoje' => $hoje]);
-$totalHoje = $stmtHoje->fetchColumn();
+/* HOJE */
+$stmt = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data = ?");
+$stmt->execute([$hoje]);
+$totalHoje = $stmt->fetchColumn();
 
-/* Semana */
-$semanaInicio = date("Y-m-d", strtotime("monday this week"));
-$semanaFim    = date("Y-m-d", strtotime("sunday this week"));
+/* SEMANA */
+$inicioSemana = date("Y-m-d", strtotime("monday this week"));
+$fimSemana    = date("Y-m-d", strtotime("sunday this week"));
+$stmt = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data BETWEEN ? AND ?");
+$stmt->execute([$inicioSemana, $fimSemana]);
+$totalSemana = $stmt->fetchColumn();
 
-$stmtSemana = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data BETWEEN :i AND :f");
-$stmtSemana->execute([
-    ':i' => $semanaInicio,
-    ':f' => $semanaFim
-]);
-$totalSemana = $stmtSemana->fetchColumn();
-
-/* Mês */
-$mesInicio = date("Y-m-01");
-$mesFim    = date("Y-m-t");
-
-$stmtMes = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data BETWEEN :i AND :f");
-$stmtMes->execute([
-    ':i' => $mesInicio,
-    ':f' => $mesFim
-]);
-$totalMes = $stmtMes->fetchColumn();
+/* MÊS */
+$inicioMes = date("Y-m-01");
+$fimMes    = date("Y-m-t");
+$stmt = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data BETWEEN ? AND ?");
+$stmt->execute([$inicioMes, $fimMes]);
+$totalMes = $stmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Painel Administrativo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
-<!-- HEADER MOBILE -->
-<header class="topbar-mobile">
-    <button id="toggleBtn"><i class="fas fa-bars"></i></button>
-    <span>Admin</span>
-</header>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <h2>Admin</h2>
-    </div>
-
+<aside class="sidebar">
     <ul class="menu">
-        <li>
-            <a href="index.php" class="active">
-                <i class="fas fa-chart-line"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
-
-        <!-- ✅ AGENDAMENTOS ABRE O FORMULÁRIO -->
-        <li>
-            <a href="novo_agendamento.php">
-                <i class="fas fa-calendar-check"></i>
-                <span>Agendamentos</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="servicos.php">
-                <i class="fas fa-briefcase"></i>
-                <span>Serviços</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="usuarios.php">
-                <i class="fas fa-users"></i>
-                <span>Usuários</span>
-            </a>
-        </li>
+        <li><a href="index.php" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="agendamentos.php"><i class="fas fa-calendar-check"></i> Agendamentos</a></li>
+        <li><a href="servicos.php"><i class="fas fa-briefcase"></i> Serviços</a></li>
+        <li><a href="usuarios.php"><i class="fas fa-users"></i> Usuários</a></li>
     </ul>
-
-    <div class="logout-box">
-        <a class="logout-btn" href="logout.php">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Sair</span>
-        </a>
-    </div>
 </aside>
 
-<!-- CONTEÚDO -->
 <main class="main-content">
+    <h1>Bem-vindo, <?= htmlspecialchars($nomeUsuario) ?></h1>
 
-    <!-- HEADER DESKTOP -->
-    <header class="desktop-header">
-        <h1>Painel Administrativo</h1>
-        <div class="user-info">
-            <i class="fas fa-user-circle"></i>
-            <?= htmlspecialchars($nomeUsuario) ?>
-        </div>
-    </header>
+    <div class="dashboard-overview">
+        <a href="agendamentos.php?filtro=hoje" class="overview-card">
+            <strong><?= $totalHoje ?></strong>
+            <span>Hoje</span>
+        </a>
 
-    <!-- VISÃO GERAL -->
-    <section class="content-box">
-        <h2>Visão Geral</h2>
+        <a href="agendamentos.php?filtro=semana" class="overview-card">
+            <strong><?= $totalSemana ?></strong>
+            <span>Semana</span>
+        </a>
 
-        <div class="dashboard-overview">
-
-            <!-- 🔹 LISTA DE HOJE -->
-            <a href="agendamentos.php?filtro=hoje" class="overview-card today">
-                <div class="icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="info">
-                    <span>Hoje</span>
-                    <strong><?= $totalHoje ?></strong>
-                    <small>Agendamentos</small>
-                </div>
-            </a>
-
-            <!-- 🔹 LISTA DA SEMANA -->
-            <a href="agendamentos.php?filtro=semana" class="overview-card week">
-                <div class="icon">
-                    <i class="fas fa-calendar-week"></i>
-                </div>
-                <div class="info">
-                    <span>Semana</span>
-                    <strong><?= $totalSemana ?></strong>
-                    <small>Agendamentos</small>
-                </div>
-            </a>
-
-            <!-- 🔹 LISTA DO MÊS -->
-            <a href="agendamentos.php?filtro=mes" class="overview-card month">
-                <div class="icon">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="info">
-                    <span>Mês</span>
-                    <strong><?= $totalMes ?></strong>
-                    <small>Agendamentos</small>
-                </div>
-            </a>
-
-        </div>
-    </section>
-
+        <a href="agendamentos.php?filtro=mes" class="overview-card">
+            <strong><?= $totalMes ?></strong>
+            <span>Mês</span>
+        </a>
+    </div>
 </main>
-
-<script>
-document.getElementById('toggleBtn').onclick = () => {
-    document.getElementById('sidebar').classList.toggle('open');
-};
-</script>
 
 </body>
 </html>
