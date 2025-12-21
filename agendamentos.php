@@ -7,57 +7,53 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-/* =============================
-   FILTRO
-============================= */
-
-$filtro = $_GET['filtro'] ?? 'hoje'; // padrão: HOJE
+$modo   = $_GET['modo'] ?? 'form'; // form = novo agendamento | lista = consultas
+$filtro = $_GET['filtro'] ?? 'hoje';
 $mesSelecionado = $_GET['mes'] ?? null;
 
-$where = "";
-$params = [];
+/* =============================
+   LISTAGEM
+============================= */
+$agendamentos = [];
 
-/* HOJE */
-if ($filtro === 'hoje') {
-    $where = "WHERE data = CURRENT_DATE";
-}
+if ($modo === 'lista') {
 
-/* SEMANA */
-elseif ($filtro === 'semana') {
-    $where = "WHERE data BETWEEN
-        (CURRENT_DATE - INTERVAL '1 day' * EXTRACT(DOW FROM CURRENT_DATE))
-        AND
-        (CURRENT_DATE + INTERVAL '1 day' * (6 - EXTRACT(DOW FROM CURRENT_DATE)))";
-}
+    $where = "";
+    $params = [];
 
-/* MÊS */
-elseif ($filtro === 'mes') {
-
-    if (!empty($mesSelecionado)) {
-        [$ano, $mes] = explode('-', $mesSelecionado);
-
-        $where = "WHERE EXTRACT(MONTH FROM data) = :mes
-                  AND EXTRACT(YEAR FROM data) = :ano";
-
-        $params = [
-            ':mes' => (int)$mes,
-            ':ano' => (int)$ano
-        ];
-    } else {
-        $where = "WHERE EXTRACT(MONTH FROM data) = EXTRACT(MONTH FROM CURRENT_DATE)
-                  AND EXTRACT(YEAR FROM data) = EXTRACT(YEAR FROM CURRENT_DATE)";
+    if ($filtro === 'hoje') {
+        $where = "WHERE data = CURRENT_DATE";
     }
-}
+    elseif ($filtro === 'semana') {
+        $where = "WHERE data BETWEEN
+            (CURRENT_DATE - INTERVAL '1 day' * EXTRACT(DOW FROM CURRENT_DATE))
+            AND
+            (CURRENT_DATE + INTERVAL '1 day' * (6 - EXTRACT(DOW FROM CURRENT_DATE)))";
+    }
+    elseif ($filtro === 'mes') {
 
-/* BUSCA AGENDAMENTOS */
-$sql = "SELECT *
-        FROM agendamentos
+        if (!empty($mesSelecionado)) {
+            [$ano, $mes] = explode('-', $mesSelecionado);
+            $where = "WHERE EXTRACT(MONTH FROM data) = :mes
+                      AND EXTRACT(YEAR FROM data) = :ano";
+            $params = [
+                ':mes' => (int)$mes,
+                ':ano' => (int)$ano
+            ];
+        } else {
+            $where = "WHERE EXTRACT(MONTH FROM data) = EXTRACT(MONTH FROM CURRENT_DATE)
+                      AND EXTRACT(YEAR FROM data) = EXTRACT(YEAR FROM CURRENT_DATE)";
+        }
+    }
+
+    $stmt = $conn->prepare("
+        SELECT * FROM agendamentos
         $where
-        ORDER BY data ASC, hora ASC";
-
-$stmt = $conn->prepare($sql);
-$stmt->execute($params);
-$agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ORDER BY data ASC, hora ASC
+    ");
+    $stmt->execute($params);
+    $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -68,44 +64,41 @@ $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <style>
 body {
-    background: #eef2f7;
-    font-family: "Poppins", sans-serif;
+    background:#eef2f7;
+    font-family:Poppins,sans-serif;
 }
 .container {
-    max-width: 1000px;
-    margin: 60px auto;
-    background: #fff;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    max-width:1000px;
+    margin:60px auto;
+    background:#fff;
+    padding:40px;
+    border-radius:16px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
 }
-.voltar {
-    text-decoration: none;
-    background: #7f8c8d;
-    color: #fff;
-    padding: 10px 15px;
-    border-radius: 8px;
+.top-actions {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
-.btn-novo {
-    float: right;
-    background: #4a6cf7;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 8px;
-    text-decoration: none;
+.btn {
+    padding:10px 16px;
+    border-radius:8px;
+    text-decoration:none;
+    color:#fff;
 }
+.btn-voltar { background:#7f8c8d; }
+.btn-novo { background:#4a6cf7; }
+
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 25px;
+    width:100%;
+    border-collapse:collapse;
+    margin-top:25px;
 }
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
+th,td {
+    padding:12px;
+    border-bottom:1px solid #ddd;
 }
-th {
-    background: #f4f6f9;
-}
+th { background:#f4f6f9; }
 </style>
 </head>
 
@@ -113,44 +106,57 @@ th {
 
 <div class="container">
 
-<a href="index.php" class="voltar">← Voltar</a>
-<a href="novo_agendamento.php" class="btn-novo">+ Novo Agendamento</a>
+<div class="top-actions">
+    <a href="index.php" class="btn btn-voltar">← Voltar</a>
+
+    <?php if ($modo !== 'lista'): ?>
+        <a href="agendamentos.php?modo=form" class="btn btn-novo">+ Novo Agendamento</a>
+    <?php endif; ?>
+</div>
 
 <h2>Agendamentos</h2>
 
-<?php if ($filtro === 'mes'): ?>
-<form method="GET" style="margin:20px 0;">
-    <input type="hidden" name="filtro" value="mes">
-    <input type="month" name="mes" value="<?= htmlspecialchars($mesSelecionado ?? date('Y-m')) ?>">
-    <button type="submit">Buscar</button>
-</form>
-<?php endif; ?>
+<?php if ($modo === 'lista'): ?>
 
-<?php if (count($agendamentos) > 0): ?>
+    <?php if ($filtro === 'mes'): ?>
+    <form method="GET" style="margin:20px 0;">
+        <input type="hidden" name="modo" value="lista">
+        <input type="hidden" name="filtro" value="mes">
+        <input type="month" name="mes" value="<?= htmlspecialchars($mesSelecionado ?? date('Y-m')) ?>">
+        <button type="submit">Buscar</button>
+    </form>
+    <?php endif; ?>
 
-<table>
-    <thead>
-        <tr>
-            <th>Paciente</th>
-            <th>Data</th>
-            <th>Hora</th>
-            <th>Tipo</th>
-        </tr>
-    </thead>
-    <tbody>
-    <?php foreach ($agendamentos as $a): ?>
-        <tr>
-            <td><?= htmlspecialchars($a['paciente']) ?></td>
-            <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
-            <td><?= substr($a['hora'], 0, 5) ?></td>
-            <td><?= ucfirst(htmlspecialchars($a['tipo_consulta'])) ?></td>
-        </tr>
-    <?php endforeach; ?>
-    </tbody>
-</table>
+    <?php if (count($agendamentos) > 0): ?>
+    <table>
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Data</th>
+                <th>Hora</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($agendamentos as $a): ?>
+            <tr>
+                <td><?= htmlspecialchars($a['paciente']) ?></td>
+                <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
+                <td><?= substr($a['hora'],0,5) ?></td>
+                <td><?= ucfirst($a['tipo_consulta']) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php else: ?>
+        <p>Nenhum agendamento encontrado.</p>
+    <?php endif; ?>
 
 <?php else: ?>
-    <p>Nenhum agendamento encontrado.</p>
+
+    <!-- FORMULÁRIO -->
+    <?php include 'novo_agendamento.php'; ?>
+
 <?php endif; ?>
 
 </div>
