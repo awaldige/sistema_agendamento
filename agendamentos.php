@@ -7,95 +7,125 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$filtro = $_GET['filtro'] ?? null;
+$filtro = $_GET['filtro'] ?? 'mes';
+$mesSelecionado = $_GET['mes'] ?? date('Y-m');
+
 $where = "";
 $params = [];
-$titulo = "Agendamentos";
 
+/* HOJE */
 if ($filtro === 'hoje') {
-    $titulo = "Agendamentos de Hoje";
-    $where = "WHERE data = ?";
-    $params[] = date("Y-m-d");
-
-} elseif ($filtro === 'semana') {
-    $titulo = "Agendamentos da Semana";
-    $where = "WHERE data BETWEEN ? AND ?";
-    $params[] = date("Y-m-d", strtotime("monday this week"));
-    $params[] = date("Y-m-d", strtotime("sunday this week"));
-
-} elseif ($filtro === 'mes') {
-    $titulo = "Agendamentos do Mês";
-    $where = "WHERE data BETWEEN ? AND ?";
-    $params[] = date("Y-m-01");
-    $params[] = date("Y-m-t");
+    $where = "WHERE data = CURRENT_DATE";
 }
 
-$sql = "
-SELECT a.*, s.nome AS servico
-FROM agendamentos a
-LEFT JOIN servicos s ON s.id = a.servico_id
-$where
-ORDER BY data, hora
-";
+/* SEMANA */
+elseif ($filtro === 'semana') {
+    $where = "WHERE data BETWEEN
+        (CURRENT_DATE - INTERVAL '1 day' * EXTRACT(DOW FROM CURRENT_DATE))
+        AND
+        (CURRENT_DATE + INTERVAL '1 day' * (6 - EXTRACT(DOW FROM CURRENT_DATE)))";
+}
+
+/* MÊS */
+else {
+    [$ano, $mes] = explode('-', $mesSelecionado);
+
+    $where = "WHERE EXTRACT(MONTH FROM data) = :mes
+              AND EXTRACT(YEAR FROM data) = :ano";
+
+    $params = [
+        ':mes' => (int)$mes,
+        ':ano' => (int)$ano
+    ];
+}
+
+$sql = "SELECT * FROM agendamentos
+        $where
+        ORDER BY data ASC, hora ASC";
+
 $stmt = $conn->prepare($sql);
 $stmt->execute($params);
-$dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title><?= $titulo ?></title>
+<title>Agendamentos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-body { font-family: Poppins, sans-serif; background:#f4f6fb; }
-.container { max-width:1000px; margin:40px auto; background:#fff; padding:30px; border-radius:14px; }
-.topo { display:flex; justify-content:space-between; align-items:center; }
-a.btn { padding:10px 14px; border-radius:8px; text-decoration:none; color:#fff; }
-.novo { background:#4a6cf7; }
-.voltar { background:#7f8c8d; }
-table { width:100%; margin-top:20px; border-collapse:collapse; }
-th, td { padding:12px; border-bottom:1px solid #eee; }
-th { background:#f0f2f7; }
+body {
+    background: #eef2f7;
+    font-family: "Poppins", sans-serif;
+}
+.container {
+    max-width: 1000px;
+    margin: 60px auto;
+    background: #fff;
+    padding: 40px;
+    border-radius: 16px;
+}
+.voltar {
+    text-decoration: none;
+    background: #7f8c8d;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background: #f4f6f9;
+}
 </style>
 </head>
+
 <body>
 
 <div class="container">
 
-<div class="topo">
-    <h2><?= $titulo ?></h2>
+<a href="index.php" class="voltar">← Voltar ao Menu</a>
 
-    <?php if (!$filtro): ?>
-        <a href="novo_agendamento.php" class="btn novo">+ Novo Agendamento</a>
-    <?php else: ?>
-        <a href="index.php" class="btn voltar">← Voltar</a>
-    <?php endif; ?>
-</div>
+<h2>Agendamentos</h2>
 
 <table>
+<thead>
 <tr>
     <th>Paciente</th>
-    <th>Serviço</th>
     <th>Data</th>
     <th>Hora</th>
     <th>Tipo</th>
 </tr>
+</thead>
+<tbody>
 
-<?php if (!$dados): ?>
-<tr><td colspan="5">Nenhum agendamento encontrado</td></tr>
+<?php if ($agendamentos): ?>
+    <?php foreach ($agendamentos as $a): ?>
+    <tr>
+        <td><?= htmlspecialchars($a['paciente']) ?></td>
+        <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
+        <td><?= substr($a['hora'], 0, 5) ?></td>
+        <td><?= ucfirst(htmlspecialchars($a['tipo_consulta'])) ?></td>
+    </tr>
+    <?php endforeach; ?>
+<?php else: ?>
+<tr>
+    <td colspan="4">Nenhum agendamento encontrado.</td>
+</tr>
 <?php endif; ?>
 
-<?php foreach ($dados as $a): ?>
-<tr>
-    <td><?= htmlspecialchars($a['paciente']) ?></td>
-    <td><?= htmlspecialchars($a['servico']) ?></td>
-    <td><?= date("d/m/Y", strtotime($a['data'])) ?></td>
-    <td><?= $a['hora'] ?></td>
-    <td><?= ucfirst($a['tipo_consulta']) ?></td>
-</tr>
-<?php endforeach; ?>
+</tbody>
 </table>
 
 </div>
+
 </body>
 </html>
