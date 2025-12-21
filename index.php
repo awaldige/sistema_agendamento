@@ -75,18 +75,22 @@ $totalMes = $stmtMes->fetchColumn();
                 <span>Dashboard</span>
             </a>
         </li>
+
+        <!-- ✅ AGENDAMENTOS ABRE O FORMULÁRIO -->
         <li>
-            <a href="agendamentos.php">
+            <a href="novo_agendamento.php">
                 <i class="fas fa-calendar-check"></i>
                 <span>Agendamentos</span>
             </a>
         </li>
+
         <li>
             <a href="servicos.php">
                 <i class="fas fa-briefcase"></i>
                 <span>Serviços</span>
             </a>
         </li>
+
         <li>
             <a href="usuarios.php">
                 <i class="fas fa-users"></i>
@@ -121,6 +125,7 @@ $totalMes = $stmtMes->fetchColumn();
 
         <div class="dashboard-overview">
 
+            <!-- 🔹 LISTA DE HOJE -->
             <a href="agendamentos.php?filtro=hoje" class="overview-card today">
                 <div class="icon">
                     <i class="fas fa-clock"></i>
@@ -132,6 +137,7 @@ $totalMes = $stmtMes->fetchColumn();
                 </div>
             </a>
 
+            <!-- 🔹 LISTA DA SEMANA -->
             <a href="agendamentos.php?filtro=semana" class="overview-card week">
                 <div class="icon">
                     <i class="fas fa-calendar-week"></i>
@@ -143,6 +149,7 @@ $totalMes = $stmtMes->fetchColumn();
                 </div>
             </a>
 
+            <!-- 🔹 LISTA DO MÊS -->
             <a href="agendamentos.php?filtro=mes" class="overview-card month">
                 <div class="icon">
                     <i class="fas fa-calendar-alt"></i>
