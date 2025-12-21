@@ -7,39 +7,63 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-/* BUSCA SERVIÇOS */
-$stmt = $conn->query("SELECT id, nome FROM servicos ORDER BY nome");
-$servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+/* =============================
+   FILTRO
+============================= */
 
-/* SALVAR AGENDAMENTO */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$filtro = $_GET['filtro'] ?? 'hoje'; // padrão: HOJE
+$mesSelecionado = $_GET['mes'] ?? null;
 
-    $sql = "INSERT INTO agendamentos
-        (paciente, email, telefone, data, hora, servico_id, tipo_consulta, observacoes)
-        VALUES
-        (:paciente, :email, :telefone, :data, :hora, :servico, :tipo, :obs)";
+$where = "";
+$params = [];
 
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([
-        ':paciente' => $_POST['paciente'],
-        ':email'    => $_POST['email'] ?? null,
-        ':telefone' => $_POST['telefone'] ?? null,
-        ':data'     => $_POST['data'],
-        ':hora'     => $_POST['hora'],
-        ':servico'  => $_POST['servico_id'],
-        ':tipo'     => $_POST['tipo_consulta'],
-        ':obs'      => $_POST['observacoes'] ?? null
-    ]);
-
-    header("Location: index.php");
-    exit();
+/* HOJE */
+if ($filtro === 'hoje') {
+    $where = "WHERE data = CURRENT_DATE";
 }
+
+/* SEMANA */
+elseif ($filtro === 'semana') {
+    $where = "WHERE data BETWEEN
+        (CURRENT_DATE - INTERVAL '1 day' * EXTRACT(DOW FROM CURRENT_DATE))
+        AND
+        (CURRENT_DATE + INTERVAL '1 day' * (6 - EXTRACT(DOW FROM CURRENT_DATE)))";
+}
+
+/* MÊS */
+elseif ($filtro === 'mes') {
+
+    if (!empty($mesSelecionado)) {
+        [$ano, $mes] = explode('-', $mesSelecionado);
+
+        $where = "WHERE EXTRACT(MONTH FROM data) = :mes
+                  AND EXTRACT(YEAR FROM data) = :ano";
+
+        $params = [
+            ':mes' => (int)$mes,
+            ':ano' => (int)$ano
+        ];
+    } else {
+        $where = "WHERE EXTRACT(MONTH FROM data) = EXTRACT(MONTH FROM CURRENT_DATE)
+                  AND EXTRACT(YEAR FROM data) = EXTRACT(YEAR FROM CURRENT_DATE)";
+    }
+}
+
+/* BUSCA AGENDAMENTOS */
+$sql = "SELECT *
+        FROM agendamentos
+        $where
+        ORDER BY data ASC, hora ASC";
+
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+$agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Novo Agendamento</title>
+<title>Agendamentos</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -48,7 +72,7 @@ body {
     font-family: "Poppins", sans-serif;
 }
 .container {
-    max-width: 700px;
+    max-width: 1000px;
     margin: 60px auto;
     background: #fff;
     padding: 40px;
@@ -56,38 +80,31 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,.08);
 }
 .voltar {
-    display: inline-block;
-    margin-bottom: 20px;
     text-decoration: none;
     background: #7f8c8d;
     color: #fff;
     padding: 10px 15px;
     border-radius: 8px;
 }
-h2 {
-    margin-bottom: 20px;
-}
-form {
-    display: grid;
-    gap: 15px;
-}
-input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-}
-textarea {
-    resize: vertical;
-}
-button {
+.btn-novo {
+    float: right;
     background: #4a6cf7;
     color: #fff;
-    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+}
+th, td {
     padding: 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background: #f4f6f9;
 }
 </style>
 </head>
@@ -97,41 +114,44 @@ button {
 <div class="container">
 
 <a href="index.php" class="voltar">← Voltar</a>
+<a href="novo_agendamento.php" class="btn-novo">+ Novo Agendamento</a>
 
-<h2>Novo Agendamento</h2>
+<h2>Agendamentos</h2>
 
-<form method="POST">
-
-    <input type="text" name="paciente" placeholder="Nome do paciente" required>
-
-    <input type="email" name="email" placeholder="E-mail">
-
-    <input type="text" name="telefone" placeholder="Telefone">
-
-    <input type="date" name="data" required>
-
-    <input type="time" name="hora" required>
-
-    <select name="servico_id" required>
-        <option value="">Selecione o serviço</option>
-        <?php foreach ($servicos as $s): ?>
-            <option value="<?= $s['id'] ?>">
-                <?= htmlspecialchars($s['nome']) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-
-    <select name="tipo_consulta" required>
-        <option value="">Tipo de consulta</option>
-        <option value="particular">Particular</option>
-        <option value="convenio">Convênio</option>
-    </select>
-
-    <textarea name="observacoes" placeholder="Observações"></textarea>
-
-    <button type="submit">Salvar Agendamento</button>
-
+<?php if ($filtro === 'mes'): ?>
+<form method="GET" style="margin:20px 0;">
+    <input type="hidden" name="filtro" value="mes">
+    <input type="month" name="mes" value="<?= htmlspecialchars($mesSelecionado ?? date('Y-m')) ?>">
+    <button type="submit">Buscar</button>
 </form>
+<?php endif; ?>
+
+<?php if (count($agendamentos) > 0): ?>
+
+<table>
+    <thead>
+        <tr>
+            <th>Paciente</th>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Tipo</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($agendamentos as $a): ?>
+        <tr>
+            <td><?= htmlspecialchars($a['paciente']) ?></td>
+            <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
+            <td><?= substr($a['hora'], 0, 5) ?></td>
+            <td><?= ucfirst(htmlspecialchars($a['tipo_consulta'])) ?></td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php else: ?>
+    <p>Nenhum agendamento encontrado.</p>
+<?php endif; ?>
 
 </div>
 
