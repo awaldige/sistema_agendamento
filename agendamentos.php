@@ -7,11 +7,19 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+/* ===== MESES EM PORTUGUÊS (SEM INTL / STRFTIME) ===== */
+$meses = [
+    1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março',
+    4 => 'Abril', 5 => 'Maio', 6 => 'Junho',
+    7 => 'Julho', 8 => 'Agosto', 9 => 'Setembro',
+    10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
+];
+
 /* ===== FILTROS ===== */
 $mes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m');
 $ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
 
-/* ===== ANOS DISPONÍVEIS ===== */
+/* ===== ANOS DISPONÍVEIS NO BANCO ===== */
 $anos = $conn->query("
     SELECT DISTINCT EXTRACT(YEAR FROM data)::int AS ano
     FROM agendamentos
@@ -30,17 +38,8 @@ $stmt->execute([
     ':mes' => $mes,
     ':ano' => $ano
 ]);
-$agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* ===== FORMATADOR DE MÊS (SEM STRFTIME) ===== */
-$fmt = new IntlDateFormatter(
-    'pt_BR',
-    IntlDateFormatter::LONG,
-    IntlDateFormatter::NONE,
-    'America/Sao_Paulo',
-    IntlDateFormatter::GREGORIAN,
-    'MMMM'
-);
+$agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -56,12 +55,14 @@ $fmt = new IntlDateFormatter(
 /* ===== FILTROS ===== */
 .filtros {
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
+    flex-wrap: wrap;
     margin-bottom: 20px;
 }
 
-.filtros select, .filtros button, .filtros a {
+.filtros select,
+.filtros button,
+.filtros a {
     padding: 10px 14px;
     border-radius: 8px;
     border: none;
@@ -84,6 +85,9 @@ $fmt = new IntlDateFormatter(
 table {
     width: 100%;
     border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 th, td {
@@ -96,9 +100,7 @@ th {
 }
 
 /* ===== MOBILE ===== */
-.cards {
-    display: none;
-}
+.cards { display: none; }
 
 .card {
     background: #fff;
@@ -108,9 +110,13 @@ th {
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
 
-@media (max-width: 768px) {
-    table { display: none; }
-    .cards { display: block; }
+.card strong {
+    font-size: 16px;
+}
+
+@media (max-width:768px) {
+    table { display:none; }
+    .cards { display:block; }
 }
 </style>
 </head>
@@ -120,20 +126,18 @@ th {
 <main class="main-content">
 
 <header>
-    <h2>
-        Consultas – <?= ucfirst($fmt->format(mktime(0,0,0,$mes,1))) ?>/<?= $ano ?>
-    </h2>
+    <h2>Consultar Consultas</h2>
 </header>
 
-<!-- 🔎 FILTROS -->
+<!-- 🔎 FILTRO MÊS / ANO -->
 <div class="filtros">
     <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;">
         <select name="mes">
-            <?php for ($m = 1; $m <= 12; $m++): ?>
-                <option value="<?= $m ?>" <?= $m === $mes ? 'selected' : '' ?>>
-                    <?= ucfirst($fmt->format(mktime(0,0,0,$m,1))) ?>
+            <?php foreach ($meses as $num => $nome): ?>
+                <option value="<?= $num ?>" <?= $num === $mes ? 'selected' : '' ?>>
+                    <?= $nome ?>
                 </option>
-            <?php endfor; ?>
+            <?php endforeach; ?>
         </select>
 
         <select name="ano">
@@ -144,7 +148,9 @@ th {
             <?php endforeach; ?>
         </select>
 
-        <button type="submit">Filtrar</button>
+        <button type="submit">
+            <i class="fas fa-search"></i> Pesquisar
+        </button>
     </form>
 
     <a href="index.php">
@@ -188,6 +194,10 @@ th {
         📌 <?= ucfirst($a['tipo_consulta']) ?>
     </div>
 <?php endforeach; ?>
+
+<?php if (!$agendamentos): ?>
+    <div class="card">Nenhuma consulta encontrada.</div>
+<?php endif; ?>
 </div>
 
 </main>
