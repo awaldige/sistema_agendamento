@@ -7,41 +7,24 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$filtro = $_GET['filtro'] ?? 'mes';
+/* ==========================
+   FILTRO SOMENTE POR MÊS/ANO
+========================== */
+
 $mesSelecionado = $_GET['mes'] ?? date('Y-m');
+[$ano, $mes] = explode('-', $mesSelecionado);
 
-$where = "";
-$params = [];
+$sql = "SELECT * FROM agendamentos
+        WHERE EXTRACT(MONTH FROM data) = :mes
+          AND EXTRACT(YEAR FROM data) = :ano
+        ORDER BY data ASC, hora ASC";
 
-/* HOJE */
-if ($filtro === 'hoje') {
-    $where = "WHERE data = CURRENT_DATE";
-}
-
-/* SEMANA */
-elseif ($filtro === 'semana') {
-    $where = "WHERE data BETWEEN
-        (CURRENT_DATE - INTERVAL '1 day' * EXTRACT(DOW FROM CURRENT_DATE))
-        AND
-        (CURRENT_DATE + INTERVAL '1 day' * (6 - EXTRACT(DOW FROM CURRENT_DATE)))";
-}
-
-/* MÊS */
-else {
-    [$ano, $mes] = explode('-', $mesSelecionado);
-
-    $where = "WHERE EXTRACT(MONTH FROM data) = :mes
-              AND EXTRACT(YEAR FROM data) = :ano";
-
-    $params = [
-        ':mes' => (int)$mes,
-        ':ano' => (int)$ano
-    ];
-}
-
-$sql = "SELECT * FROM agendamentos $where ORDER BY data ASC, hora ASC";
 $stmt = $conn->prepare($sql);
-$stmt->execute($params);
+$stmt->execute([
+    ':mes' => (int)$mes,
+    ':ano' => (int)$ano
+]);
+
 $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -61,21 +44,22 @@ $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
+    align-items: center;
 }
 
-.filtros a, .filtros button {
+.filtros input[type="month"] {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.filtros a {
     padding: 10px 14px;
-    background: #4a6cf7;
+    background: #7f8c8d;
     color: #fff;
     border-radius: 8px;
     text-decoration: none;
-    border: none;
-    cursor: pointer;
     font-size: 14px;
-}
-
-.filtros a.secondary {
-    background: #7f8c8d;
 }
 
 /* ===== TABELA ===== */
@@ -93,6 +77,12 @@ th {
     background: #f4f6f9;
 }
 
+td a {
+    margin-right: 10px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
 /* ===== MOBILE ===== */
 .cards {
     display: none;
@@ -104,6 +94,17 @@ th {
     padding: 16px;
     margin-bottom: 14px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.card-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 12px;
+}
+
+.card-actions a {
+    text-decoration: none;
+    font-size: 15px;
 }
 
 @media (max-width: 768px) {
@@ -125,22 +126,18 @@ th {
     <h2>Consultar Consultas</h2>
 </header>
 
-<!-- 🔎 FILTROS -->
+<!-- 🔎 FILTRO POR MÊS -->
 <div class="filtros">
-    <a href="agendamentos.php?filtro=hoje">Hoje</a>
-    <a href="agendamentos.php?filtro=semana">Semana</a>
-
     <form method="GET">
         <input type="month" name="mes" value="<?= $mesSelecionado ?>" onchange="this.form.submit()">
-        <input type="hidden" name="filtro" value="mes">
     </form>
 
-    <a href="index.php" class="secondary">
+    <a href="index.php">
         <i class="fas fa-arrow-left"></i> Menu
     </a>
 </div>
 
-<!-- DESKTOP -->
+<!-- ===== DESKTOP ===== -->
 <table>
 <thead>
 <tr>
@@ -148,6 +145,7 @@ th {
     <th>Data</th>
     <th>Hora</th>
     <th>Tipo</th>
+    <th>Ações</th>
 </tr>
 </thead>
 <tbody>
@@ -157,23 +155,36 @@ th {
     <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
     <td><?= substr($a['hora'], 0, 5) ?></td>
     <td><?= ucfirst($a['tipo_consulta']) ?></td>
+    <td>
+        <a href="editar_agendamento.php?id=<?= $a['id'] ?>">✏️</a>
+        <a href="excluir_agendamento.php?id=<?= $a['id'] ?>"
+           onclick="return confirm('Deseja excluir esta consulta?')">🗑</a>
+    </td>
 </tr>
 <?php endforeach; else: ?>
-<tr><td colspan="4">Nenhuma consulta encontrada.</td></tr>
+<tr><td colspan="5">Nenhuma consulta encontrada.</td></tr>
 <?php endif; ?>
 </tbody>
 </table>
 
-<!-- MOBILE -->
+<!-- ===== MOBILE ===== -->
 <div class="cards">
-<?php foreach ($agendamentos as $a): ?>
+<?php if ($agendamentos): foreach ($agendamentos as $a): ?>
     <div class="card">
         <strong><?= htmlspecialchars($a['paciente']) ?></strong>
         <div>📅 <?= date('d/m/Y', strtotime($a['data'])) ?></div>
         <div>⏰ <?= substr($a['hora'], 0, 5) ?></div>
         <div>📌 <?= ucfirst($a['tipo_consulta']) ?></div>
+
+        <div class="card-actions">
+            <a href="editar_agendamento.php?id=<?= $a['id'] ?>">✏️ Editar</a>
+            <a href="excluir_agendamento.php?id=<?= $a['id'] ?>"
+               onclick="return confirm('Excluir consulta?')">🗑 Excluir</a>
+        </div>
     </div>
-<?php endforeach; ?>
+<?php endforeach; else: ?>
+    <p>Nenhuma consulta encontrada.</p>
+<?php endif; ?>
 </div>
 
 </main>
