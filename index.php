@@ -9,21 +9,32 @@ if (!isset($_SESSION['user_id'])) {
 
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
-/* ===== DADOS PARA GRÁFICOS ===== */
+/* ===== FILTROS ===== */
+$mes = $_GET['mes'] ?? date('m');
+$ano = $_GET['ano'] ?? date('Y');
 
-// Consultas por mês (ano atual)
-$anoAtual = date('Y');
+/* ===== ANOS DISPONÍVEIS NO BANCO ===== */
+$anos = $conn->query("
+    SELECT DISTINCT EXTRACT(YEAR FROM data) AS ano
+    FROM agendamentos
+    ORDER BY ano DESC
+")->fetchAll(PDO::FETCH_COLUMN);
+
+/* ===== CONSULTAS POR MÊS / ANO ===== */
 $stmt = $conn->prepare("
     SELECT EXTRACT(MONTH FROM data) AS mes, COUNT(*) AS total
     FROM agendamentos
-    WHERE EXTRACT(YEAR FROM data) = :ano
+    WHERE EXTRACT(MONTH FROM data) = :mes
+      AND EXTRACT(YEAR FROM data) = :ano
     GROUP BY mes
-    ORDER BY mes
 ");
-$stmt->execute([':ano' => $anoAtual]);
+$stmt->execute([
+    ':mes' => (int)$mes,
+    ':ano' => (int)$ano
+]);
 $dadosMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Tipos de consulta
+/* ===== TIPO DE CONSULTA ===== */
 $stmt = $conn->query("
     SELECT tipo_consulta, COUNT(*) AS total
     FROM agendamentos
@@ -103,11 +114,36 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <section class="content-box">
     <h2>Visão Geral</h2>
 
+    <!-- 🔎 FILTRO MÊS / ANO -->
+    <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+        <select name="mes">
+            <?php for ($m=1;$m<=12;$m++): ?>
+                <option value="<?= $m ?>" <?= $m==$mes?'selected':'' ?>>
+                    <?= strftime('%B', mktime(0,0,0,$m,1)) ?>
+                </option>
+            <?php endfor; ?>
+        </select>
+
+        <select name="ano">
+            <?php foreach ($anos as $a): ?>
+                <option value="<?= $a ?>" <?= $a==$ano?'selected':'' ?>>
+                    <?= $a ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <button type="submit">Atualizar</button>
+
+        <a href="index.php" class="secondary" style="padding:10px 14px;border-radius:8px;background:#7f8c8d;color:#fff;text-decoration:none;">
+            ← Menu
+        </a>
+    </form>
+
     <!-- 📊 GRÁFICOS -->
     <div class="dashboard-graficos">
 
         <div class="grafico-box">
-            <h4>Consultas por Mês (<?= $anoAtual ?>)</h4>
+            <h4>Consultas – <?= strftime('%B', mktime(0,0,0,$mes,1)) ?>/<?= $ano ?></h4>
             <canvas id="graficoMes"></canvas>
         </div>
 
@@ -121,40 +157,32 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </main>
 
-<!-- JS MENU -->
 <script>
 function toggleMenu() {
     document.querySelector('.sidebar').classList.toggle('open');
 }
-</script>
 
-<!-- JS GRÁFICOS -->
-<script>
-const meses = <?= json_encode(array_map(fn($d) => 'Mês '.$d['mes'], $dadosMes)) ?>;
-const totaisMes = <?= json_encode(array_map(fn($d) => $d['total'], $dadosMes)) ?>;
-
+/* GRÁFICO MÊS */
 new Chart(document.getElementById('graficoMes'), {
     type: 'bar',
     data: {
-        labels: meses,
+        labels: ['Consultas'],
         datasets: [{
-            label: 'Consultas',
-            data: totaisMes,
+            label: 'Total',
+            data: [<?= $dadosMes[0]['total'] ?? 0 ?>],
             backgroundColor: '#4a6cf7'
         }]
     }
 });
 
-const tipos = <?= json_encode(array_map(fn($d) => ucfirst($d['tipo_consulta']), $dadosTipo)) ?>;
-const totaisTipo = <?= json_encode(array_map(fn($d) => $d['total'], $dadosTipo)) ?>;
-
+/* GRÁFICO TIPO */
 new Chart(document.getElementById('graficoTipo'), {
     type: 'doughnut',
     data: {
-        labels: tipos,
+        labels: <?= json_encode(array_map(fn($d)=>ucfirst($d['tipo_consulta']), $dadosTipo)) ?>,
         datasets: [{
-            data: totaisTipo,
-            backgroundColor: ['#4a6cf7', '#2ecc71', '#f39c12']
+            data: <?= json_encode(array_map(fn($d)=>$d['total'], $dadosTipo)) ?>,
+            backgroundColor: ['#4a6cf7','#2ecc71','#f39c12']
         }]
     }
 });
