@@ -9,37 +9,38 @@ if (!isset($_SESSION['user_id'])) {
 
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
-$hoje = date("Y-m-d");
+/* =========================
+   GRÁFICO – CONSULTAS POR MÊS
+========================= */
+$grafMes = $conn->query("
+    SELECT 
+        TO_CHAR(data, 'MM/YYYY') as mes,
+        COUNT(*) as total
+    FROM agendamentos
+    GROUP BY mes
+    ORDER BY mes
+")->fetchAll(PDO::FETCH_ASSOC);
 
-/* HOJE */
-$stmt = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data = ?");
-$stmt->execute([$hoje]);
-$totalHoje = $stmt->fetchColumn();
-
-/* SEMANA */
-$inicioSemana = date("Y-m-d", strtotime("monday this week"));
-$fimSemana    = date("Y-m-d", strtotime("sunday this week"));
-$stmt = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data BETWEEN ? AND ?");
-$stmt->execute([$inicioSemana, $fimSemana]);
-$totalSemana = $stmt->fetchColumn();
-
-/* MÊS */
-$inicioMes = date("Y-m-01");
-$fimMes    = date("Y-m-t");
-$stmt = $conn->prepare("SELECT COUNT(*) FROM agendamentos WHERE data BETWEEN ? AND ?");
-$stmt->execute([$inicioMes, $fimMes]);
-$totalMes = $stmt->fetchColumn();
+/* =========================
+   GRÁFICO – TIPO DE CONSULTA
+========================= */
+$grafTipo = $conn->query("
+    SELECT tipo_consulta, COUNT(*) as total
+    FROM agendamentos
+    GROUP BY tipo_consulta
+")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
 
 <aside class="sidebar">
@@ -51,14 +52,14 @@ $totalMes = $stmt->fetchColumn();
         </li>
 
         <li>
-            <a href="novo_agendamento.php">
-                <i class="fas fa-calendar-plus"></i> Novo Agendamento
+            <a href="agendamentos.php">
+                <i class="fas fa-calendar-check"></i> Consultar Consultas
             </a>
         </li>
 
         <li>
-            <a href="agendamentos.php">
-                <i class="fas fa-calendar-check"></i> Consultar Agendamentos
+            <a href="novo_agendamento.php">
+                <i class="fas fa-plus-circle"></i> Novo Agendamento
             </a>
         </li>
 
@@ -74,8 +75,8 @@ $totalMes = $stmt->fetchColumn();
             </a>
         </li>
 
-        <li>
-            <a href="logout.php">
+        <li class="logout-box">
+            <a href="logout.php" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Sair
             </a>
         </li>
@@ -85,55 +86,73 @@ $totalMes = $stmt->fetchColumn();
 <main class="main-content">
 
 <header>
-    <button class="toggle-btn" onclick="toggleMenu()">
-        <i class="fas fa-bars"></i>
-    </button>
-
+    <h1>Dashboard</h1>
     <div class="user-info">
-        👋 <?= htmlspecialchars($nomeUsuario) ?>
+        <i class="fas fa-user-circle"></i>
+        <?= htmlspecialchars($nomeUsuario) ?>
     </div>
 </header>
 
-<div class="dashboard-overview">
+<section class="content-box">
+    <h2>Visão Geral</h2>
 
-    <a href="agendamentos.php?filtro=mes" class="overview-card month">
-        <div class="icon"><i class="fas fa-chart-bar"></i></div>
-        <div class="info">
-            <span>Relatório</span>
-            <strong>Mensal</strong>
-            <small>Consultas</small>
+    <div class="dashboard-graficos">
+
+        <div class="grafico-box">
+            <h3>Consultas por Mês</h3>
+            <canvas id="graficoMes"></canvas>
         </div>
-    </a>
 
-    <a href="agendamentos.php?filtro=semana" class="overview-card week">
-        <div class="icon"><i class="fas fa-calendar-week"></i></div>
-        <div class="info">
-            <span>Relatório</span>
-            <strong>Semanal</strong>
-            <small>Consultas</small>
+        <div class="grafico-box">
+            <h3>Tipo de Consulta</h3>
+            <canvas id="graficoTipo"></canvas>
         </div>
-    </a>
 
-    <a href="agendamentos.php" class="overview-card today">
-        <div class="icon"><i class="fas fa-list"></i></div>
-        <div class="info">
-            <span>Consultar</span>
-            <strong>Agenda</strong>
-            <small>Completa</small>
-        </div>
-    </a>
-
-</div>
-
+    </div>
+</section>
 
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-function toggleMenu() {
-    document.querySelector('.sidebar').classList.toggle('open');
-}
+const meses = <?= json_encode(array_column($grafMes, 'mes')) ?>;
+const totalMes = <?= json_encode(array_column($grafMes, 'total')) ?>;
+
+const tipos = <?= json_encode(array_column($grafTipo, 'tipo_consulta')) ?>;
+const totalTipos = <?= json_encode(array_column($grafTipo, 'total')) ?>;
+
+new Chart(document.getElementById('graficoMes'), {
+    type: 'bar',
+    data: {
+        labels: meses,
+        datasets: [{
+            label: 'Consultas',
+            data: totalMes,
+            backgroundColor: '#4a6cf7'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+new Chart(document.getElementById('graficoTipo'), {
+    type: 'doughnut',
+    data: {
+        labels: tipos,
+        datasets: [{
+            data: totalTipos,
+            backgroundColor: ['#2ecc71', '#f39c12']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
 </script>
 
 </body>
 </html>
-
