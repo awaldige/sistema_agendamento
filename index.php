@@ -42,10 +42,30 @@ $totalMes = $stmt->fetchColumn();
 
 <aside class="sidebar">
     <ul class="menu">
-        <li><a href="index.php" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-        <li><a href="agendamentos.php"><i class="fas fa-calendar-check"></i> Agendamentos</a></li>
-        <li><a href="servicos.php"><i class="fas fa-briefcase"></i> Serviços</a></li>
-        <li><a href="usuarios.php"><i class="fas fa-users"></i> Usuários</a></li>
+        <li>
+            <a href="index.php" class="active">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+        </li>
+
+        <!-- ✅ AGENDAMENTOS ABRE O FORMULÁRIO -->
+        <li>
+            <a href="novo_agendamento.php">
+                <i class="fas fa-calendar-check"></i> Agendamentos
+            </a>
+        </li>
+
+        <li>
+            <a href="servicos.php">
+                <i class="fas fa-briefcase"></i> Serviços
+            </a>
+        </li>
+
+        <li>
+            <a href="usuarios.php">
+                <i class="fas fa-users"></i> Usuários
+            </a>
+        </li>
     </ul>
 </aside>
 
