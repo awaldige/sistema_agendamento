@@ -40,6 +40,7 @@ $totalMes = $stmt->fetchColumn();
 </head>
 <body>
 
+<!-- SIDEBAR -->
 <aside class="sidebar">
     <ul class="menu">
         <li>
@@ -48,7 +49,6 @@ $totalMes = $stmt->fetchColumn();
             </a>
         </li>
 
-        <!-- ✅ AGENDAMENTOS ABRE A LISTA -->
         <li>
             <a href="agendamentos.php">
                 <i class="fas fa-calendar-check"></i> Agendamentos
@@ -67,53 +67,62 @@ $totalMes = $stmt->fetchColumn();
             </a>
         </li>
     </ul>
+
+    <!-- 🔴 BOTÃO SAIR -->
+    <div class="logout-box">
+        <a href="logout.php" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+    </div>
 </aside>
 
+<!-- CONTEÚDO -->
 <main class="main-content">
 
+    <!-- HEADER -->
     <header>
+        <h1>Dashboard</h1>
         <div class="user-info">
             <i class="fas fa-user-circle"></i>
-            Bem-vindo, <?= htmlspecialchars($nomeUsuario) ?>
+            <?= htmlspecialchars($nomeUsuario) ?>
         </div>
     </header>
 
-    <div class="dashboard-overview">
+    <!-- VISÃO GERAL -->
+    <section class="content-box">
+        <h2>Visão Geral</h2>
 
-        <a href="agendamentos.php?filtro=hoje" class="overview-card today">
-            <div class="icon">
-                <i class="fas fa-calendar-day"></i>
-            </div>
-            <div class="info">
-                <span>Hoje</span>
-                <strong><?= $totalHoje ?></strong>
-                <small>Agendamentos</small>
-            </div>
-        </a>
+        <div class="dashboard-overview">
 
-        <a href="agendamentos.php?filtro=semana" class="overview-card week">
-            <div class="icon">
-                <i class="fas fa-calendar-week"></i>
-            </div>
-            <div class="info">
-                <span>Semana</span>
-                <strong><?= $totalSemana ?></strong>
-                <small>Agendamentos</small>
-            </div>
-        </a>
+            <a href="agendamentos.php?filtro=hoje" class="overview-card today">
+                <div class="icon"><i class="fas fa-clock"></i></div>
+                <div class="info">
+                    <span>Hoje</span>
+                    <strong><?= $totalHoje ?></strong>
+                    <small>Agendamentos</small>
+                </div>
+            </a>
 
-        <a href="agendamentos.php?filtro=mes" class="overview-card month">
-            <div class="icon">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <div class="info">
-                <span>Mês</span>
-                <strong><?= $totalMes ?></strong>
-                <small>Agendamentos</small>
-            </div>
-        </a>
+            <a href="agendamentos.php?filtro=semana" class="overview-card week">
+                <div class="icon"><i class="fas fa-calendar-week"></i></div>
+                <div class="info">
+                    <span>Semana</span>
+                    <strong><?= $totalSemana ?></strong>
+                    <small>Agendamentos</small>
+                </div>
+            </a>
 
-    </div>
+            <a href="agendamentos.php?filtro=mes" class="overview-card month">
+                <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="info">
+                    <span>Mês</span>
+                    <strong><?= $totalMes ?></strong>
+                    <small>Agendamentos</small>
+                </div>
+            </a>
+
+        </div>
+    </section>
 
 </main>
 
