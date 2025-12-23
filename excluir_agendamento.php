@@ -7,15 +7,11 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$id = $_GET['id'] ?? '';
-
-if (empty($id)) {
-    die("ID inválido.");
+$id = $_GET['id'] ?? null;
+if ($id) {
+    $stmt = $conn->prepare("DELETE FROM agendamentos WHERE id = ?");
+    $stmt->execute([$id]);
 }
 
-$sql = "DELETE FROM agendamentos WHERE id = :id LIMIT 1";
-$stmt = $conn->prepare($sql);
-$stmt->execute([':id' => $id]);
-
-header("Location: agendamentos.php?excluido=1");
+header("Location: agendamentos.php");
 exit();
