@@ -23,6 +23,29 @@ input, select, textarea, button {
 }
 button { background:#4a6cf7; color:#fff; border:none; }
 a { text-decoration:none; display:inline-block; margin-bottom:15px; }
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        margin: 20px auto;
+        padding: 20px;
+        width: 100%;
+        border-radius: 14px;
+    }
+
+    input, select, textarea, button {
+        font-size: 16px;
+        padding: 14px;
+    }
+
+    h2 {
+        font-size: 20px;
+        text-align: center;
+    }
+}
+    
 </style>
 </head>
 <body>
@@ -60,4 +83,5 @@ a { text-decoration:none; display:inline-block; margin-bottom:15px; }
 
 </body>
 </html>
+
 
