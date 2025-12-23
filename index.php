@@ -9,27 +9,31 @@ if (!isset($_SESSION['user_id'])) {
 
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
-/* ===== DADOS PARA GRÁFICOS ===== */
+/* ===== ANO SELECIONADO ===== */
+$anoSelecionado = $_GET['ano'] ?? date('Y');
 
-// Consultas por mês (ano atual)
-$anoAtual = date('Y');
+/* ===== GRÁFICO POR MÊS ===== */
 $stmt = $conn->prepare("
     SELECT EXTRACT(MONTH FROM data) AS mes, COUNT(*) AS total
     FROM agendamentos
     WHERE EXTRACT(YEAR FROM data) = :ano
     GROUP BY mes
-    ORDER BY mes
 ");
-$stmt->execute([':ano' => $anoAtual]);
-$dadosMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->execute([':ano' => $anoSelecionado]);
+$resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Tipos de consulta
-$stmt = $conn->query("
-    SELECT tipo_consulta, COUNT(*) AS total
-    FROM agendamentos
-    GROUP BY tipo_consulta
-");
-$dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
+/* MESES FIXOS */
+$meses = [
+    1 => 'Jan', 2 => 'Fev', 3 => 'Mar', 4 => 'Abr',
+    5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago',
+    9 => 'Set', 10 => 'Out', 11 => 'Nov', 12 => 'Dez'
+];
+
+$totaisMes = array_fill(1, 12, 0);
+
+foreach ($resultado as $r) {
+    $totaisMes[(int)$r['mes']] = (int)$r['total'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -46,54 +50,48 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
     <ul class="menu">
         <li>
             <a href="index.php" class="active">
                 <i class="fas fa-chart-line"></i> Dashboard
             </a>
         </li>
-
         <li>
             <a href="agendamentos.php">
                 <i class="fas fa-calendar-check"></i> Consultar Consultas
             </a>
         </li>
-
         <li>
             <a href="novo_agendamento.php">
                 <i class="fas fa-plus-circle"></i> Novo Agendamento
             </a>
         </li>
-
         <li>
             <a href="servicos.php">
                 <i class="fas fa-briefcase"></i> Serviços
             </a>
         </li>
-
         <li>
             <a href="usuarios.php">
                 <i class="fas fa-users"></i> Usuários
             </a>
         </li>
-
         <li>
-            <a href="logout.php" style="background:#c0392b;color:#fff;">
+            <a href="logout.php">
                 <i class="fas fa-sign-out-alt"></i> Sair
             </a>
         </li>
     </ul>
 </aside>
 
-<!-- CONTEÚDO -->
+<!-- MAIN -->
 <main class="main-content">
 
 <header>
     <button class="toggle-btn" onclick="toggleMenu()">
         <i class="fas fa-bars"></i>
     </button>
-
     <div class="user-info">
         <i class="fas fa-user-circle"></i>
         <?= htmlspecialchars($nomeUsuario) ?>
@@ -101,61 +99,51 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </header>
 
 <section class="content-box">
-    <h2>Visão Geral</h2>
+    <h2>Gráficos de Consultas</h2>
 
-    <!-- 📊 GRÁFICOS -->
+    <!-- SELETOR DE ANO -->
+    <form method="GET" style="margin:15px 0">
+        <label><strong>Ano:</strong></label>
+        <select name="ano" onchange="this.form.submit()">
+            <?php
+            for ($y = date('Y'); $y >= date('Y') - 5; $y--) {
+                $selected = ($y == $anoSelecionado) ? 'selected' : '';
+                echo "<option value='$y' $selected>$y</option>";
+            }
+            ?>
+        </select>
+    </form>
+
+    <!-- GRÁFICOS -->
     <div class="dashboard-graficos">
-
         <div class="grafico-box">
-            <h4>Consultas por Mês (<?= $anoAtual ?>)</h4>
+            <h3>Consultas por Mês</h3>
             <canvas id="graficoMes"></canvas>
         </div>
-
-        <div class="grafico-box">
-            <h4>Tipo de Consulta</h4>
-            <canvas id="graficoTipo"></canvas>
-        </div>
-
     </div>
 </section>
 
 </main>
 
-<!-- JS MENU -->
 <script>
 function toggleMenu() {
-    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar').classList.toggle('open');
 }
-</script>
 
-<!-- JS GRÁFICOS -->
-<script>
-const meses = <?= json_encode(array_map(fn($d) => 'Mês '.$d['mes'], $dadosMes)) ?>;
-const totaisMes = <?= json_encode(array_map(fn($d) => $d['total'], $dadosMes)) ?>;
-
+/* GRÁFICO */
 new Chart(document.getElementById('graficoMes'), {
     type: 'bar',
     data: {
-        labels: meses,
+        labels: <?= json_encode(array_values($meses)) ?>,
         datasets: [{
-            label: 'Consultas',
-            data: totaisMes,
+            label: 'Consultas em <?= $anoSelecionado ?>',
+            data: <?= json_encode(array_values($totaisMes)) ?>,
             backgroundColor: '#4a6cf7'
         }]
-    }
-});
-
-const tipos = <?= json_encode(array_map(fn($d) => ucfirst($d['tipo_consulta']), $dadosTipo)) ?>;
-const totaisTipo = <?= json_encode(array_map(fn($d) => $d['total'], $dadosTipo)) ?>;
-
-new Chart(document.getElementById('graficoTipo'), {
-    type: 'doughnut',
-    data: {
-        labels: tipos,
-        datasets: [{
-            data: totaisTipo,
-            backgroundColor: ['#4a6cf7', '#2ecc71', '#f39c12']
-        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
     }
 });
 </script>
