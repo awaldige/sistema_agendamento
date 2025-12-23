@@ -48,9 +48,9 @@ $totalMes = $stmt->fetchColumn();
             </a>
         </li>
 
-        <!-- ✅ AGENDAMENTOS ABRE O FORMULÁRIO -->
+        <!-- ✅ AGENDAMENTOS ABRE A LISTA -->
         <li>
-            <a href="novo_agendamento.php">
+            <a href="agendamentos.php">
                 <i class="fas fa-calendar-check"></i> Agendamentos
             </a>
         </li>
@@ -70,24 +70,51 @@ $totalMes = $stmt->fetchColumn();
 </aside>
 
 <main class="main-content">
-    <h1>Bem-vindo, <?= htmlspecialchars($nomeUsuario) ?></h1>
+
+    <header>
+        <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            Bem-vindo, <?= htmlspecialchars($nomeUsuario) ?>
+        </div>
+    </header>
 
     <div class="dashboard-overview">
-        <a href="agendamentos.php?filtro=hoje" class="overview-card">
-            <strong><?= $totalHoje ?></strong>
-            <span>Hoje</span>
+
+        <a href="agendamentos.php?filtro=hoje" class="overview-card today">
+            <div class="icon">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="info">
+                <span>Hoje</span>
+                <strong><?= $totalHoje ?></strong>
+                <small>Agendamentos</small>
+            </div>
         </a>
 
-        <a href="agendamentos.php?filtro=semana" class="overview-card">
-            <strong><?= $totalSemana ?></strong>
-            <span>Semana</span>
+        <a href="agendamentos.php?filtro=semana" class="overview-card week">
+            <div class="icon">
+                <i class="fas fa-calendar-week"></i>
+            </div>
+            <div class="info">
+                <span>Semana</span>
+                <strong><?= $totalSemana ?></strong>
+                <small>Agendamentos</small>
+            </div>
         </a>
 
-        <a href="agendamentos.php?filtro=mes" class="overview-card">
-            <strong><?= $totalMes ?></strong>
-            <span>Mês</span>
+        <a href="agendamentos.php?filtro=mes" class="overview-card month">
+            <div class="icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="info">
+                <span>Mês</span>
+                <strong><?= $totalMes ?></strong>
+                <small>Agendamentos</small>
+            </div>
         </a>
+
     </div>
+
 </main>
 
 </body>
