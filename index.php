@@ -9,26 +9,27 @@ if (!isset($_SESSION['user_id'])) {
 
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
-/* =========================
-   GRÁFICO – CONSULTAS POR MÊS
-========================= */
-$grafMes = $conn->query("
-    SELECT 
-        TO_CHAR(data, 'MM/YYYY') as mes,
-        COUNT(*) as total
+/* ===== DADOS PARA GRÁFICOS ===== */
+
+// Consultas por mês (ano atual)
+$anoAtual = date('Y');
+$stmt = $conn->prepare("
+    SELECT EXTRACT(MONTH FROM data) AS mes, COUNT(*) AS total
     FROM agendamentos
+    WHERE EXTRACT(YEAR FROM data) = :ano
     GROUP BY mes
     ORDER BY mes
-")->fetchAll(PDO::FETCH_ASSOC);
+");
+$stmt->execute([':ano' => $anoAtual]);
+$dadosMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* =========================
-   GRÁFICO – TIPO DE CONSULTA
-========================= */
-$grafTipo = $conn->query("
-    SELECT tipo_consulta, COUNT(*) as total
+// Tipos de consulta
+$stmt = $conn->query("
+    SELECT tipo_consulta, COUNT(*) AS total
     FROM agendamentos
     GROUP BY tipo_consulta
-")->fetchAll(PDO::FETCH_ASSOC);
+");
+$dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -39,10 +40,12 @@ $grafTipo = $conn->query("
 
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <aside class="sidebar">
     <ul class="menu">
         <li>
@@ -75,18 +78,22 @@ $grafTipo = $conn->query("
             </a>
         </li>
 
-        <li class="logout-box">
-            <a href="logout.php" class="logout-btn">
+        <li>
+            <a href="logout.php" style="background:#c0392b;color:#fff;">
                 <i class="fas fa-sign-out-alt"></i> Sair
             </a>
         </li>
     </ul>
 </aside>
 
+<!-- CONTEÚDO -->
 <main class="main-content">
 
 <header>
-    <h1>Dashboard</h1>
+    <button class="toggle-btn" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
+
     <div class="user-info">
         <i class="fas fa-user-circle"></i>
         <?= htmlspecialchars($nomeUsuario) ?>
@@ -96,15 +103,16 @@ $grafTipo = $conn->query("
 <section class="content-box">
     <h2>Visão Geral</h2>
 
+    <!-- 📊 GRÁFICOS -->
     <div class="dashboard-graficos">
 
         <div class="grafico-box">
-            <h3>Consultas por Mês</h3>
+            <h4>Consultas por Mês (<?= $anoAtual ?>)</h4>
             <canvas id="graficoMes"></canvas>
         </div>
 
         <div class="grafico-box">
-            <h3>Tipo de Consulta</h3>
+            <h4>Tipo de Consulta</h4>
             <canvas id="graficoTipo"></canvas>
         </div>
 
@@ -113,14 +121,17 @@ $grafTipo = $conn->query("
 
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<!-- JS MENU -->
 <script>
-const meses = <?= json_encode(array_column($grafMes, 'mes')) ?>;
-const totalMes = <?= json_encode(array_column($grafMes, 'total')) ?>;
+function toggleMenu() {
+    document.querySelector('.sidebar').classList.toggle('open');
+}
+</script>
 
-const tipos = <?= json_encode(array_column($grafTipo, 'tipo_consulta')) ?>;
-const totalTipos = <?= json_encode(array_column($grafTipo, 'total')) ?>;
+<!-- JS GRÁFICOS -->
+<script>
+const meses = <?= json_encode(array_map(fn($d) => 'Mês '.$d['mes'], $dadosMes)) ?>;
+const totaisMes = <?= json_encode(array_map(fn($d) => $d['total'], $dadosMes)) ?>;
 
 new Chart(document.getElementById('graficoMes'), {
     type: 'bar',
@@ -128,28 +139,23 @@ new Chart(document.getElementById('graficoMes'), {
         labels: meses,
         datasets: [{
             label: 'Consultas',
-            data: totalMes,
+            data: totaisMes,
             backgroundColor: '#4a6cf7'
         }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
     }
 });
+
+const tipos = <?= json_encode(array_map(fn($d) => ucfirst($d['tipo_consulta']), $dadosTipo)) ?>;
+const totaisTipo = <?= json_encode(array_map(fn($d) => $d['total'], $dadosTipo)) ?>;
 
 new Chart(document.getElementById('graficoTipo'), {
     type: 'doughnut',
     data: {
         labels: tipos,
         datasets: [{
-            data: totalTipos,
-            backgroundColor: ['#2ecc71', '#f39c12']
+            data: totaisTipo,
+            backgroundColor: ['#4a6cf7', '#2ecc71', '#f39c12']
         }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
     }
 });
 </script>
