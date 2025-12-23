@@ -247,3 +247,42 @@ header {
         padding: 16px;
     }
 }
+/* ===== MELHORIAS MOBILE  ===== */
+
+@media (max-width: 768px) {
+
+    table {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .voltar {
+        display: block;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    th:nth-child(2),
+    td:nth-child(2),
+    th:nth-child(3),
+    td:nth-child(3) {
+        display: none; /* esconde data e hora */
+    }
+}
+
