@@ -148,3 +148,37 @@ header {
         grid-template-columns: 1fr;
     }
 }
+/* =========================
+   DASHBOARD – GRÁFICOS
+========================= */
+
+.dashboard-graficos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.grafico-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    height: 320px;
+}
+
+.grafico-box canvas {
+    width: 100% !important;
+    height: 240px !important;
+}
+
+@media (max-width: 768px) {
+    .grafico-box {
+        height: auto;
+    }
+
+    .grafico-box canvas {
+        height: 200px !important;
+    }
+}
+
