@@ -59,6 +59,7 @@ body {
     background: #eef2f7;
     font-family: "Poppins", sans-serif;
 }
+
 .container {
     max-width: 1000px;
     margin: 60px auto;
@@ -66,24 +67,58 @@ body {
     padding: 40px;
     border-radius: 16px;
 }
-.voltar {
+
+/* TOPO */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.page-header h2 {
+    margin: 0;
+}
+
+/* BOTÕES */
+.btn {
     text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-voltar {
     background: #7f8c8d;
     color: #fff;
-    padding: 10px 15px;
-    border-radius: 8px;
 }
+
+.btn-novo {
+    background: #4a6cf7;
+    color: #fff;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+/* TABELA */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
 }
+
 th, td {
     padding: 12px;
     border-bottom: 1px solid #ddd;
 }
+
 th {
     background: #f4f6f9;
+    text-align: left;
 }
 </style>
 </head>
@@ -92,38 +127,46 @@ th {
 
 <div class="container">
 
-<a href="index.php" class="voltar">← Voltar ao Menu</a>
+    <div class="page-header">
+        <h2>Agendamentos</h2>
 
-<h2>Agendamentos</h2>
+        <!-- 🔹 BOTÃO QUE ABRE O FORMULÁRIO -->
+        <a href="novo_agendamento.php" class="btn btn-novo">
+            ➕ Novo Agendamento
+        </a>
+    </div>
 
-<table>
-<thead>
-<tr>
-    <th>Paciente</th>
-    <th>Data</th>
-    <th>Hora</th>
-    <th>Tipo</th>
-</tr>
-</thead>
-<tbody>
+    <!-- 🔹 VOLTAR SEMPRE PARA O MENU -->
+    <a href="index.php" class="btn btn-voltar">← Voltar ao menu</a>
 
-<?php if ($agendamentos): ?>
-    <?php foreach ($agendamentos as $a): ?>
-    <tr>
-        <td><?= htmlspecialchars($a['paciente']) ?></td>
-        <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
-        <td><?= substr($a['hora'], 0, 5) ?></td>
-        <td><?= ucfirst(htmlspecialchars($a['tipo_consulta'])) ?></td>
-    </tr>
-    <?php endforeach; ?>
-<?php else: ?>
-<tr>
-    <td colspan="4">Nenhum agendamento encontrado.</td>
-</tr>
-<?php endif; ?>
+    <table>
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Data</th>
+                <th>Hora</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
 
-</tbody>
-</table>
+        <?php if ($agendamentos): ?>
+            <?php foreach ($agendamentos as $a): ?>
+            <tr>
+                <td><?= htmlspecialchars($a['paciente']) ?></td>
+                <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
+                <td><?= substr($a['hora'], 0, 5) ?></td>
+                <td><?= ucfirst(htmlspecialchars($a['tipo_consulta'])) ?></td>
+            </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="4">Nenhum agendamento encontrado.</td>
+            </tr>
+        <?php endif; ?>
+
+        </tbody>
+    </table>
 
 </div>
 
