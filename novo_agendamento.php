@@ -7,81 +7,194 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$servicos = $conn->query("SELECT id, nome FROM servicos ORDER BY nome")->fetchAll();
+$servicos = $conn->query("SELECT id, nome FROM servicos ORDER BY nome")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <title>Novo Agendamento</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
-body { background:#f4f6fb; font-family:Poppins; }
-.container { max-width:500px; margin:60px auto; background:#fff; padding:30px; border-radius:16px; }
-input, select, textarea, button {
-    width:100%; padding:12px; margin-bottom:12px;
-    border-radius:10px; border:1px solid #ccc;
+/* =========================
+   BASE
+========================= */
+* {
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
 }
-button { background:#4a6cf7; color:#fff; border:none; }
-a { text-decoration:none; display:inline-block; margin-bottom:15px; }
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
+
+body {
+    margin: 0;
+    background: #f3f6fb;
+}
+
+/* =========================
+   CONTAINER PRINCIPAL
+========================= */
+.agendamento-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.agendamento-container {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    padding: 28px;
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   HEADER
+========================= */
+.topo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.topo a {
+    text-decoration: none;
+    color: #4a6cf7;
+    font-weight: 500;
+}
+
+.topo h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #2c3e50;
+}
+
+/* =========================
+   FORMULÁRIO
+========================= */
+label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+}
+
+input,
+select,
+textarea,
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+textarea {
+    resize: none;
+    min-height: 90px;
+}
+
+button {
+    background: #4a6cf7;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #3b5be0;
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 768px) {
+
+    .agendamento-page {
+        padding: 0;
     }
 
-    .container {
-        margin: 20px auto;
-        padding: 20px;
-        width: 100%;
-        border-radius: 14px;
+    .agendamento-container {
+        min-height: 100vh;
+        border-radius: 0;
+        padding: 24px;
+        box-shadow: none;
     }
 
-    input, select, textarea, button {
-        font-size: 16px;
-        padding: 14px;
-    }
-
-    h2 {
+    .topo h2 {
         font-size: 20px;
-        text-align: center;
     }
 }
-    
 </style>
 </head>
+
 <body>
 
-<div class="container">
-<a href="index.php">← Voltar ao Menu</a>
+<div class="agendamento-page">
+    <div class="agendamento-container">
 
-<h2>Novo Agendamento</h2>
+        <div class="topo">
+            <a href="index.php">
+                <i class="fas fa-arrow-left"></i> Menu
+            </a>
+        </div>
 
-<form action="salvar_agendamento.php" method="POST">
-    <input type="text" name="paciente" placeholder="Paciente" required>
-    <input type="email" name="email" placeholder="Email">
-    <input type="text" name="telefone" placeholder="Telefone">
-    <input type="date" name="data" required>
-    <input type="time" name="hora" required>
+        <h2>Novo Agendamento</h2>
 
-    <select name="servico_id" required>
-        <option value="">Selecione o serviço</option>
-        <?php foreach ($servicos as $s): ?>
-        <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['nome']) ?></option>
-        <?php endforeach; ?>
-    </select>
+        <form method="POST" action="salvar_agendamento.php">
 
-    <select name="tipo_consulta" required>
-        <option value="">Tipo de consulta</option>
-        <option value="particular">Particular</option>
-        <option value="convenio">Convênio</option>
-    </select>
+            <label>Paciente</label>
+            <input type="text" name="paciente" required>
 
-    <textarea name="observacoes" placeholder="Observações"></textarea>
+            <label>Email</label>
+            <input type="email" name="email">
 
-    <button type="submit">Salvar</button>
-</form>
+            <label>Telefone</label>
+            <input type="text" name="telefone">
+
+            <label>Data</label>
+            <input type="date" name="data" required>
+
+            <label>Hora</label>
+            <input type="time" name="hora" required>
+
+            <label>Serviço</label>
+            <select name="servico_id" required>
+                <option value="">Selecione o serviço</option>
+                <?php foreach ($servicos as $s): ?>
+                    <option value="<?= $s['id'] ?>">
+                        <?= htmlspecialchars($s['nome']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <label>Tipo de Consulta</label>
+            <select name="tipo_consulta" required>
+                <option value="">Selecione</option>
+                <option value="particular">Particular</option>
+                <option value="convenio">Convênio</option>
+            </select>
+
+            <label>Observações</label>
+            <textarea name="observacoes"></textarea>
+
+            <button type="submit">
+                <i class="fas fa-save"></i> Salvar Agendamento
+            </button>
+
+        </form>
+
+    </div>
 </div>
 
 </body>
 </html>
-
-
