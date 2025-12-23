@@ -95,21 +95,36 @@ $totalMes = $stmt->fetchColumn();
 </header>
 
 <div class="dashboard-overview">
-    <a href="agendamentos.php?filtro=hoje" class="overview-card">
-        <strong><?= $totalHoje ?></strong>
-        <span>Agendamentos Hoje</span>
+
+    <a href="agendamentos.php?filtro=mes" class="overview-card month">
+        <div class="icon"><i class="fas fa-chart-bar"></i></div>
+        <div class="info">
+            <span>Relatório</span>
+            <strong>Mensal</strong>
+            <small>Consultas</small>
+        </div>
     </a>
 
-    <a href="agendamentos.php?filtro=semana" class="overview-card">
-        <strong><?= $totalSemana ?></strong>
-        <span>Esta Semana</span>
+    <a href="agendamentos.php?filtro=semana" class="overview-card week">
+        <div class="icon"><i class="fas fa-calendar-week"></i></div>
+        <div class="info">
+            <span>Relatório</span>
+            <strong>Semanal</strong>
+            <small>Consultas</small>
+        </div>
     </a>
 
-    <a href="agendamentos.php?filtro=mes" class="overview-card">
-        <strong><?= $totalMes ?></strong>
-        <span>Este Mês</span>
+    <a href="agendamentos.php" class="overview-card today">
+        <div class="icon"><i class="fas fa-list"></i></div>
+        <div class="info">
+            <span>Consultar</span>
+            <strong>Agenda</strong>
+            <small>Completa</small>
+        </div>
     </a>
+
 </div>
+
 
 </main>
 
@@ -121,3 +136,4 @@ function toggleMenu() {
 
 </body>
 </html>
+
