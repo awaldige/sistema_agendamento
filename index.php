@@ -34,13 +34,14 @@ $totalMes = $stmt->fetchColumn();
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dashboard</title>
+
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
     <ul class="menu">
         <li>
@@ -50,8 +51,14 @@ $totalMes = $stmt->fetchColumn();
         </li>
 
         <li>
+            <a href="novo_agendamento.php">
+                <i class="fas fa-calendar-plus"></i> Novo Agendamento
+            </a>
+        </li>
+
+        <li>
             <a href="agendamentos.php">
-                <i class="fas fa-calendar-check"></i> Agendamentos
+                <i class="fas fa-calendar-check"></i> Consultar Agendamentos
             </a>
         </li>
 
@@ -66,65 +73,51 @@ $totalMes = $stmt->fetchColumn();
                 <i class="fas fa-users"></i> Usuários
             </a>
         </li>
-    </ul>
 
-    <!-- 🔴 BOTÃO SAIR -->
-    <div class="logout-box">
-        <a href="logout.php" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Sair
-        </a>
-    </div>
+        <li>
+            <a href="logout.php">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </a>
+        </li>
+    </ul>
 </aside>
 
-<!-- CONTEÚDO -->
 <main class="main-content">
 
-    <!-- HEADER -->
-    <header>
-        <h1>Dashboard</h1>
-        <div class="user-info">
-            <i class="fas fa-user-circle"></i>
-            <?= htmlspecialchars($nomeUsuario) ?>
-        </div>
-    </header>
+<header>
+    <button class="toggle-btn" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
 
-    <!-- VISÃO GERAL -->
-    <section class="content-box">
-        <h2>Visão Geral</h2>
+    <div class="user-info">
+        👋 <?= htmlspecialchars($nomeUsuario) ?>
+    </div>
+</header>
 
-        <div class="dashboard-overview">
+<div class="dashboard-overview">
+    <a href="agendamentos.php?filtro=hoje" class="overview-card">
+        <strong><?= $totalHoje ?></strong>
+        <span>Agendamentos Hoje</span>
+    </a>
 
-            <a href="agendamentos.php?filtro=hoje" class="overview-card today">
-                <div class="icon"><i class="fas fa-clock"></i></div>
-                <div class="info">
-                    <span>Hoje</span>
-                    <strong><?= $totalHoje ?></strong>
-                    <small>Agendamentos</small>
-                </div>
-            </a>
+    <a href="agendamentos.php?filtro=semana" class="overview-card">
+        <strong><?= $totalSemana ?></strong>
+        <span>Esta Semana</span>
+    </a>
 
-            <a href="agendamentos.php?filtro=semana" class="overview-card week">
-                <div class="icon"><i class="fas fa-calendar-week"></i></div>
-                <div class="info">
-                    <span>Semana</span>
-                    <strong><?= $totalSemana ?></strong>
-                    <small>Agendamentos</small>
-                </div>
-            </a>
-
-            <a href="agendamentos.php?filtro=mes" class="overview-card month">
-                <div class="icon"><i class="fas fa-calendar-alt"></i></div>
-                <div class="info">
-                    <span>Mês</span>
-                    <strong><?= $totalMes ?></strong>
-                    <small>Agendamentos</small>
-                </div>
-            </a>
-
-        </div>
-    </section>
+    <a href="agendamentos.php?filtro=mes" class="overview-card">
+        <strong><?= $totalMes ?></strong>
+        <span>Este Mês</span>
+    </a>
+</div>
 
 </main>
+
+<script>
+function toggleMenu() {
+    document.querySelector('.sidebar').classList.toggle('open');
+}
+</script>
 
 </body>
 </html>
