@@ -28,7 +28,7 @@ a { text-decoration:none; display:inline-block; margin-bottom:15px; }
 <body>
 
 <div class="container">
-<a href="agendamentos.php">← Voltar para Agendamentos</a>
+<a href="index.php">← Voltar ao Menu</a>
 
 <h2>Novo Agendamento</h2>
 
@@ -60,3 +60,4 @@ a { text-decoration:none; display:inline-block; margin-bottom:15px; }
 
 </body>
 </html>
+
