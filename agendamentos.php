@@ -7,6 +7,127 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+$mes = $_GET['mes'] ?? date('m');
+$ano = $_GET['ano'] ?? date('Y');
+
+$stmt = $conn->prepare("
+    SELECT * FROM agendamentos
+    WHERE EXTRACT(MONTH FROM data) = :mes
+    AND EXTRACT(YEAR FROM data) = :ano
+    ORDER BY data, hora
+");
+$stmt->execute([
+    ':mes' => (int)$mes,
+    ':ano' => (int)$ano
+]);
+$agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Consultar Consultas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+.filtros {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.filtros select, .filtros a {
+    padding: 10px;
+    border-radius: 8px;
+}
+.cards { display:none; }
+
+@media(max-width:768px){
+    table { display:none; }
+    .cards { display:block; }
+}
+</style>
+</head>
+
+<body>
+
+<main class="main-content">
+
+<header>
+    <h2>Consultar Consultas</h2>
+</header>
+
+<div class="filtros">
+    <form method="GET">
+        <select name="mes">
+            <?php for($m=1;$m<=12;$m++): ?>
+                <option value="<?= $m ?>" <?= $m==$mes?'selected':'' ?>>
+                    <?= strftime('%B', mktime(0,0,0,$m,1)) ?>
+                </option>
+            <?php endfor; ?>
+        </select>
+
+        <select name="ano">
+            <?php for($y=date('Y');$y>=date('Y')-5;$y--): ?>
+                <option value="<?= $y ?>" <?= $y==$ano?'selected':'' ?>><?= $y ?></option>
+            <?php endfor; ?>
+        </select>
+
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <a href="index.php">← Menu</a>
+</div>
+
+<table>
+<thead>
+<tr>
+    <th>Paciente</th>
+    <th>Data</th>
+    <th>Hora</th>
+    <th>Tipo</th>
+</tr>
+</thead>
+<tbody>
+<?php if($agendamentos): foreach($agendamentos as $a): ?>
+<tr>
+    <td><?= htmlspecialchars($a['paciente']) ?></td>
+    <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
+    <td><?= substr($a['hora'],0,5) ?></td>
+    <td><?= ucfirst($a['tipo_consulta']) ?></td>
+</tr>
+<?php endforeach; else: ?>
+<tr><td colspan="4">Nenhuma consulta encontrada.</td></tr>
+<?php endif; ?>
+</tbody>
+</table>
+
+<div class="cards">
+<?php foreach($agendamentos as $a): ?>
+    <div class="card">
+        <strong><?= htmlspecialchars($a['paciente']) ?></strong><br>
+        📅 <?= date('d/m/Y', strtotime($a['data'])) ?><br>
+        ⏰ <?= substr($a['hora'],0,5) ?><br>
+        📌 <?= ucfirst($a['tipo_consulta']) ?>
+    </div>
+<?php endforeach; ?>
+</div>
+
+</main>
+
+</body>
+</html>
+<?php
+session_start();
+require_once 'conexao.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 /* ==========================
    FILTRO SOMENTE POR MÊS/ANO
 ========================== */
@@ -191,3 +312,4 @@ td a {
 
 </body>
 </html>
+
