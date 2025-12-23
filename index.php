@@ -10,36 +10,51 @@ if (!isset($_SESSION['user_id'])) {
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
 /* ===== FILTROS ===== */
-$mes = $_GET['mes'] ?? date('m');
-$ano = $_GET['ano'] ?? date('Y');
+$mes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m');
+$ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
 
-/* ===== ANOS DISPONÍVEIS NO BANCO ===== */
+/* ===== FORMATADOR DE DATA (SUBSTITUI strftime) ===== */
+$fmt = new IntlDateFormatter(
+    'pt_BR',
+    IntlDateFormatter::LONG,
+    IntlDateFormatter::NONE,
+    'America/Sao_Paulo',
+    IntlDateFormatter::GREGORIAN,
+    'MMMM'
+);
+
+/* ===== ANOS DISPONÍVEIS ===== */
 $anos = $conn->query("
-    SELECT DISTINCT EXTRACT(YEAR FROM data) AS ano
+    SELECT DISTINCT EXTRACT(YEAR FROM data)::int AS ano
     FROM agendamentos
     ORDER BY ano DESC
 ")->fetchAll(PDO::FETCH_COLUMN);
 
-/* ===== CONSULTAS POR MÊS / ANO ===== */
+/* ===== TOTAL DE CONSULTAS DO MÊS / ANO ===== */
 $stmt = $conn->prepare("
-    SELECT EXTRACT(MONTH FROM data) AS mes, COUNT(*) AS total
+    SELECT COUNT(*) AS total
     FROM agendamentos
     WHERE EXTRACT(MONTH FROM data) = :mes
       AND EXTRACT(YEAR FROM data) = :ano
-    GROUP BY mes
 ");
 $stmt->execute([
-    ':mes' => (int)$mes,
-    ':ano' => (int)$ano
+    ':mes' => $mes,
+    ':ano' => $ano
 ]);
-$dadosMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$totalMes = (int)$stmt->fetchColumn();
 
 /* ===== TIPO DE CONSULTA ===== */
-$stmt = $conn->query("
+$stmt = $conn->prepare("
     SELECT tipo_consulta, COUNT(*) AS total
     FROM agendamentos
+    WHERE EXTRACT(MONTH FROM data) = :mes
+      AND EXTRACT(YEAR FROM data) = :ano
     GROUP BY tipo_consulta
 ");
+$stmt->execute([
+    ':mes' => $mes,
+    ':ano' => $ano
+]);
 $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -119,7 +134,7 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <select name="mes">
             <?php for ($m=1;$m<=12;$m++): ?>
                 <option value="<?= $m ?>" <?= $m==$mes?'selected':'' ?>>
-                    <?= strftime('%B', mktime(0,0,0,$m,1)) ?>
+                    <?= ucfirst($fmt->format(mktime(0,0,0,$m,1))) ?>
                 </option>
             <?php endfor; ?>
         </select>
@@ -134,7 +149,7 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <button type="submit">Atualizar</button>
 
-        <a href="index.php" class="secondary" style="padding:10px 14px;border-radius:8px;background:#7f8c8d;color:#fff;text-decoration:none;">
+        <a href="index.php" style="padding:10px 14px;border-radius:8px;background:#7f8c8d;color:#fff;text-decoration:none;">
             ← Menu
         </a>
     </form>
@@ -143,7 +158,9 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="dashboard-graficos">
 
         <div class="grafico-box">
-            <h4>Consultas – <?= strftime('%B', mktime(0,0,0,$mes,1)) ?>/<?= $ano ?></h4>
+            <h4>
+                Consultas – <?= ucfirst($fmt->format(mktime(0,0,0,$mes,1))) ?>/<?= $ano ?>
+            </h4>
             <canvas id="graficoMes"></canvas>
         </div>
 
@@ -162,28 +179,34 @@ function toggleMenu() {
     document.querySelector('.sidebar').classList.toggle('open');
 }
 
-/* GRÁFICO MÊS */
+/* GRÁFICO TOTAL DO MÊS */
 new Chart(document.getElementById('graficoMes'), {
     type: 'bar',
     data: {
         labels: ['Consultas'],
         datasets: [{
             label: 'Total',
-            data: [<?= $dadosMes[0]['total'] ?? 0 ?>],
+            data: [<?= $totalMes ?>],
             backgroundColor: '#4a6cf7'
         }]
+    },
+    options: {
+        responsive: true
     }
 });
 
-/* GRÁFICO TIPO */
+/* GRÁFICO TIPO DE CONSULTA */
 new Chart(document.getElementById('graficoTipo'), {
     type: 'doughnut',
     data: {
         labels: <?= json_encode(array_map(fn($d)=>ucfirst($d['tipo_consulta']), $dadosTipo)) ?>,
         datasets: [{
-            data: <?= json_encode(array_map(fn($d)=>$d['total'], $dadosTipo)) ?>,
+            data: <?= json_encode(array_map(fn($d)=>(int)$d['total'], $dadosTipo)) ?>,
             backgroundColor: ['#4a6cf7','#2ecc71','#f39c12']
         }]
+    },
+    options: {
+        responsive: true
     }
 });
 </script>
