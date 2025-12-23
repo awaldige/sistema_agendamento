@@ -7,216 +7,190 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-/* =============================
-   CONTROLE DE FILTROS
-============================= */
+/* ===== FILTROS ===== */
+$mes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m');
+$ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
 
-$filtro = $_GET['filtro'] ?? null;
-$mesSelecionado = $_GET['mes'] ?? null;
+/* ===== ANOS DISPONÍVEIS ===== */
+$anos = $conn->query("
+    SELECT DISTINCT EXTRACT(YEAR FROM data)::int AS ano
+    FROM agendamentos
+    ORDER BY ano DESC
+")->fetchAll(PDO::FETCH_COLUMN);
 
-/* 🚀 SEM FILTRO → ABRE FORMULÁRIO */
-if ($filtro === null) {
-    header("Location: novo_agendamento.php");
-    exit();
-}
+/* ===== CONSULTAS ===== */
+$stmt = $conn->prepare("
+    SELECT *
+    FROM agendamentos
+    WHERE EXTRACT(MONTH FROM data) = :mes
+      AND EXTRACT(YEAR FROM data) = :ano
+    ORDER BY data ASC, hora ASC
+");
+$stmt->execute([
+    ':mes' => $mes,
+    ':ano' => $ano
+]);
+$agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$mostrarLista = false;
-$mostrarFiltroMes = false;
-
-$agendamentos = [];
-$where = "";
-$params = [];
-
-/* =============================
-   HOJE
-============================= */
-if ($filtro === 'hoje') {
-    $mostrarLista = true;
-    $where = "WHERE data = CURRENT_DATE";
-}
-
-/* =============================
-   SEMANA
-============================= */
-elseif ($filtro === 'semana') {
-    $mostrarLista = true;
-    $where = "WHERE data BETWEEN
-        (CURRENT_DATE - INTERVAL '1 day' * EXTRACT(DOW FROM CURRENT_DATE))
-        AND
-        (CURRENT_DATE + INTERVAL '1 day' * (6 - EXTRACT(DOW FROM CURRENT_DATE)))";
-}
-
-/* =============================
-   MÊS
-============================= */
-elseif ($filtro === 'mes') {
-    $mostrarLista = true;
-    $mostrarFiltroMes = true;
-
-    /* MÊS SELECIONADO */
-    if (!empty($mesSelecionado)) {
-        [$ano, $mes] = explode('-', $mesSelecionado);
-
-        $where = "WHERE EXTRACT(MONTH FROM data) = :mes
-                  AND EXTRACT(YEAR FROM data) = :ano";
-
-        $params = [
-            ':mes' => (int)$mes,
-            ':ano' => (int)$ano
-        ];
-    }
-    /* MÊS ATUAL */
-    else {
-        $where = "WHERE EXTRACT(MONTH FROM data) = EXTRACT(MONTH FROM CURRENT_DATE)
-                  AND EXTRACT(YEAR FROM data) = EXTRACT(YEAR FROM CURRENT_DATE)";
-    }
-}
-
-/* =============================
-   EXECUTA QUERY
-============================= */
-if ($mostrarLista) {
-    $sql = "SELECT *
-            FROM agendamentos
-            $where
-            ORDER BY data ASC, hora ASC";
-
-    $stmt = $conn->prepare($sql);
-    $stmt->execute($params);
-    $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+/* ===== FORMATADOR DE MÊS (SEM STRFTIME) ===== */
+$fmt = new IntlDateFormatter(
+    'pt_BR',
+    IntlDateFormatter::LONG,
+    IntlDateFormatter::NONE,
+    'America/Sao_Paulo',
+    IntlDateFormatter::GREGORIAN,
+    'MMMM'
+);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Agendamentos</title>
+<title>Consultar Consultas</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
-body {
-    background: #eef2f7;
-    font-family: "Poppins", sans-serif;
+/* ===== FILTROS ===== */
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
 }
-.container {
-    max-width: 1000px;
-    margin: 60px auto;
-    background: #fff;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+
+.filtros select, .filtros button, .filtros a {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
 }
-.voltar {
-    text-decoration: none;
+
+.filtros button {
+    background: #4a6cf7;
+    color: #fff;
+    cursor: pointer;
+}
+
+.filtros a {
     background: #7f8c8d;
     color: #fff;
-    padding: 10px 15px;
-    border-radius: 8px;
+    text-decoration: none;
 }
+
+/* ===== TABELA ===== */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
 }
+
 th, td {
     padding: 12px;
     border-bottom: 1px solid #ddd;
 }
+
 th {
     background: #f4f6f9;
 }
 
-/* FILTRO MÊS */
-.filtro-mes {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin: 20px 0;
-    flex-wrap: wrap;
+/* ===== MOBILE ===== */
+.cards {
+    display: none;
 }
-.filtro-mes label {
-    font-weight: 500;
+
+.card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
-.filtro-mes input {
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-.filtro-mes button {
-    background: #4a6cf7;
-    color: #fff;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-.filtro-mes a {
-    background: #7f8c8d;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 6px;
-    text-decoration: none;
+
+@media (max-width: 768px) {
+    table { display: none; }
+    .cards { display: block; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<main class="main-content">
 
-<a href="index.php" class="voltar">← Voltar</a>
+<header>
+    <h2>
+        Consultas – <?= ucfirst($fmt->format(mktime(0,0,0,$mes,1))) ?>/<?= $ano ?>
+    </h2>
+</header>
 
-<h2>Agendamentos</h2>
+<!-- 🔎 FILTROS -->
+<div class="filtros">
+    <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;">
+        <select name="mes">
+            <?php for ($m = 1; $m <= 12; $m++): ?>
+                <option value="<?= $m ?>" <?= $m === $mes ? 'selected' : '' ?>>
+                    <?= ucfirst($fmt->format(mktime(0,0,0,$m,1))) ?>
+                </option>
+            <?php endfor; ?>
+        </select>
 
-<!-- 🔎 FILTRO POR MÊS -->
-<?php if ($mostrarFiltroMes): ?>
-<form method="GET" class="filtro-mes">
-    <input type="hidden" name="filtro" value="mes">
+        <select name="ano">
+            <?php foreach ($anos as $a): ?>
+                <option value="<?= $a ?>" <?= $a === $ano ? 'selected' : '' ?>>
+                    <?= $a ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-    <label>Mês:</label>
-    <input
-        type="month"
-        name="mes"
-        value="<?= htmlspecialchars($mesSelecionado ?? date('Y-m')) ?>">
+        <button type="submit">Filtrar</button>
+    </form>
 
-    <button type="submit">Buscar</button>
-
-    <a href="agendamentos.php?filtro=mes">Mês Atual</a>
-</form>
-<?php endif; ?>
-
-<?php if ($mostrarLista): ?>
-
-    <?php if (count($agendamentos) > 0): ?>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Paciente</th>
-                <th>Data</th>
-                <th>Hora</th>
-                <th>Tipo</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($agendamentos as $a): ?>
-            <tr>
-                <td><?= htmlspecialchars($a['paciente']) ?></td>
-                <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
-                <td><?= substr($a['hora'], 0, 5) ?></td>
-                <td><?= ucfirst(htmlspecialchars($a['tipo_consulta'])) ?></td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <?php else: ?>
-        <p>Nenhum agendamento encontrado.</p>
-    <?php endif; ?>
-
-<?php endif; ?>
-
+    <a href="index.php">
+        <i class="fas fa-arrow-left"></i> Menu
+    </a>
 </div>
+
+<!-- DESKTOP -->
+<table>
+<thead>
+<tr>
+    <th>Paciente</th>
+    <th>Data</th>
+    <th>Hora</th>
+    <th>Tipo</th>
+</tr>
+</thead>
+<tbody>
+<?php if ($agendamentos): foreach ($agendamentos as $a): ?>
+<tr>
+    <td><?= htmlspecialchars($a['paciente']) ?></td>
+    <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
+    <td><?= substr($a['hora'], 0, 5) ?></td>
+    <td><?= ucfirst($a['tipo_consulta']) ?></td>
+</tr>
+<?php endforeach; else: ?>
+<tr>
+    <td colspan="4">Nenhuma consulta encontrada.</td>
+</tr>
+<?php endif; ?>
+</tbody>
+</table>
+
+<!-- MOBILE -->
+<div class="cards">
+<?php foreach ($agendamentos as $a): ?>
+    <div class="card">
+        <strong><?= htmlspecialchars($a['paciente']) ?></strong><br>
+        📅 <?= date('d/m/Y', strtotime($a['data'])) ?><br>
+        ⏰ <?= substr($a['hora'], 0, 5) ?><br>
+        📌 <?= ucfirst($a['tipo_consulta']) ?>
+    </div>
+<?php endforeach; ?>
+</div>
+
+</main>
 
 </body>
 </html>
