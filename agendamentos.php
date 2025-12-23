@@ -154,6 +154,7 @@ th {
     <th>Data</th>
     <th>Hora</th>
     <th>Tipo</th>
+    <th>Ações</th>
 </tr>
 </thead>
 <tbody>
@@ -164,14 +165,21 @@ th {
         <td><?= htmlspecialchars($a['paciente']) ?></td>
         <td><?= date('d/m/Y', strtotime($a['data'])) ?></td>
         <td><?= substr($a['hora'], 0, 5) ?></td>
-        <td><?= ucfirst(htmlspecialchars($a['tipo_consulta'])) ?></td>
+        <td><?= ucfirst($a['tipo_consulta']) ?></td>
+        <td>
+            <a href="editar_agendamento.php?id=<?= $a['id'] ?>">✏️</a>
+            |
+            <a href="excluir_agendamento.php?id=<?= $a['id'] ?>"
+               onclick="return confirm('Excluir este agendamento?')">🗑</a>
+        </td>
     </tr>
     <?php endforeach; ?>
 <?php else: ?>
 <tr>
-    <td colspan="4">Nenhum agendamento encontrado.</td>
+    <td colspan="5">Nenhum agendamento encontrado.</td>
 </tr>
 <?php endif; ?>
+
 
 </tbody>
 </table>
@@ -180,3 +188,4 @@ th {
 
 </body>
 </html>
+
