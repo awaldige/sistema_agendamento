@@ -9,19 +9,17 @@ if (!isset($_SESSION['user_id'])) {
 
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
+/* ===== MESES EM PORTUGUÊS (SEM STRFTIME / INTL) ===== */
+$meses = [
+    1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março',
+    4 => 'Abril', 5 => 'Maio', 6 => 'Junho',
+    7 => 'Julho', 8 => 'Agosto', 9 => 'Setembro',
+    10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
+];
+
 /* ===== FILTROS ===== */
 $mes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m');
 $ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
-
-/* ===== FORMATADOR DE DATA (SUBSTITUI strftime) ===== */
-$fmt = new IntlDateFormatter(
-    'pt_BR',
-    IntlDateFormatter::LONG,
-    IntlDateFormatter::NONE,
-    'America/Sao_Paulo',
-    IntlDateFormatter::GREGORIAN,
-    'MMMM'
-);
 
 /* ===== ANOS DISPONÍVEIS ===== */
 $anos = $conn->query("
@@ -30,9 +28,9 @@ $anos = $conn->query("
     ORDER BY ano DESC
 ")->fetchAll(PDO::FETCH_COLUMN);
 
-/* ===== TOTAL DE CONSULTAS DO MÊS / ANO ===== */
+/* ===== TOTAL CONSULTAS DO MÊS ===== */
 $stmt = $conn->prepare("
-    SELECT COUNT(*) AS total
+    SELECT COUNT(*) 
     FROM agendamentos
     WHERE EXTRACT(MONTH FROM data) = :mes
       AND EXTRACT(YEAR FROM data) = :ano
@@ -129,14 +127,14 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <section class="content-box">
     <h2>Visão Geral</h2>
 
-    <!-- 🔎 FILTRO MÊS / ANO -->
+    <!-- 🔎 FILTRO -->
     <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
         <select name="mes">
-            <?php for ($m=1;$m<=12;$m++): ?>
-                <option value="<?= $m ?>" <?= $m==$mes?'selected':'' ?>>
-                    <?= ucfirst($fmt->format(mktime(0,0,0,$m,1))) ?>
+            <?php foreach ($meses as $num => $nome): ?>
+                <option value="<?= $num ?>" <?= $num==$mes?'selected':'' ?>>
+                    <?= $nome ?>
                 </option>
-            <?php endfor; ?>
+            <?php endforeach; ?>
         </select>
 
         <select name="ano">
@@ -158,9 +156,7 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="dashboard-graficos">
 
         <div class="grafico-box">
-            <h4>
-                Consultas – <?= ucfirst($fmt->format(mktime(0,0,0,$mes,1))) ?>/<?= $ano ?>
-            </h4>
+            <h4>Consultas – <?= $meses[$mes] ?>/<?= $ano ?></h4>
             <canvas id="graficoMes"></canvas>
         </div>
 
@@ -179,7 +175,7 @@ function toggleMenu() {
     document.querySelector('.sidebar').classList.toggle('open');
 }
 
-/* GRÁFICO TOTAL DO MÊS */
+/* TOTAL DO MÊS */
 new Chart(document.getElementById('graficoMes'), {
     type: 'bar',
     data: {
@@ -190,12 +186,10 @@ new Chart(document.getElementById('graficoMes'), {
             backgroundColor: '#4a6cf7'
         }]
     },
-    options: {
-        responsive: true
-    }
+    options: { responsive: true }
 });
 
-/* GRÁFICO TIPO DE CONSULTA */
+/* TIPO DE CONSULTA */
 new Chart(document.getElementById('graficoTipo'), {
     type: 'doughnut',
     data: {
@@ -205,9 +199,7 @@ new Chart(document.getElementById('graficoTipo'), {
             backgroundColor: ['#4a6cf7','#2ecc71','#f39c12']
         }]
     },
-    options: {
-        responsive: true
-    }
+    options: { responsive: true }
 });
 </script>
 
