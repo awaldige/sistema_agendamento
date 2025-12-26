@@ -9,8 +9,8 @@ if (!isset($_SESSION['user_id'])) {
 
 $id = $_GET['id'] ?? null;
 if ($id) {
-    $stmt = $conn->prepare("DELETE FROM agendamentos WHERE id = ?");
-    $stmt->execute([$id]);
+    $stmt = $conn->prepare("DELETE FROM agendamentos WHERE id=:id");
+    $stmt->execute([':id'=>$id]);
 }
 
 header("Location: agendamentos.php");
