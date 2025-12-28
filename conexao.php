@@ -5,7 +5,7 @@ $dbname = 'postgres';
 
 // ⚠️ USUÁRIO TEM O ID DO PROJETO
 $user = 'postgres.blpwyipmbhrbtxvqxhwr';
-$password = '@Awaldige785143';
+$password = 'IHvWatreUxImDCsD';
 
 try {
     $conn = new PDO(
