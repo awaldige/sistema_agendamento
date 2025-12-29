@@ -2,145 +2,157 @@
 session_start();
 require_once 'conexao.php';
 
-// Verifica login
+// Proteção
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-// Buscar usuários (SEM email)
-$sql = "SELECT id, nome, username, nivel FROM usuarios ORDER BY nome ASC";
-$stmt = $conn->query($sql);
-$usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Busca usuários
+$sql = "SELECT id, nome, username, created_at
+        FROM usuarios
+        ORDER BY nome";
+
+$usuarios = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Usuários</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
+    <meta charset="UTF-8">
+    <title>Usuários</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-body {
-    margin: 0;
-    padding: 0;
-    background: #f4f6fb;
-    font-family: "Poppins", sans-serif;
-}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eef2f7;
+            font-family: "Poppins", sans-serif;
+        }
 
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    background: #fff;
-    padding: 35px;
-    border-radius: 18px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
 
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #2c3e50;
-    font-weight: 600;
-}
+        h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-th, td {
-    padding: 14px;
-    border-bottom: 1px solid #e1e6f0;
-}
+        .btn {
+            padding: 10px 15px;
+            background: #4a6cf7;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+        }
 
-th {
-    background: #f0f3fa;
-    font-weight: 600;
-}
+        .btn:hover {
+            background: #2649f5;
+        }
 
-.btn {
-    padding: 8px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #fff;
-    font-size: 13px;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-.btn-add {
-    background: #27ae60;
-    float: right;
-    margin-bottom: 20px;
-}
+        th, td {
+            padding: 14px;
+            text-align: left;
+        }
 
-.btn-add:hover {
-    background: #1e8449;
-}
+        th {
+            background: #f4f6fb;
+            color: #2c3e50;
+        }
 
-.btn-del {
-    background: #e74c3c;
-}
+        tr:nth-child(even) {
+            background: #fafbfe;
+        }
 
-.btn-del:hover {
-    background: #c0392b;
-}
+        .acoes a {
+            margin-right: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            color: #4a6cf7;
+        }
 
-.btn-edit {
-    background: #4a6cf7;
-}
+        .acoes a.excluir {
+            color: #e74c3c;
+        }
 
-.btn-edit:hover {
-    background: #2649f5;
-}
-
-.voltar {
-    display: inline-block;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    background: #7f8c8d;
-    color: #fff;
-    border-radius: 8px;
-    text-decoration: none;
-}
-
-.voltar:hover {
-    background: #636e72;
-}
-
-</style>
+        .sucesso {
+            background: #eafaf1;
+            border-left: 4px solid #2ecc71;
+            padding: 12px;
+            color: #27ae60;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
+
 <body>
 
 <div class="container">
 
-    <a href="index.php" class="voltar">← Voltar</a>
+    <div class="topo">
+        <h2>Usuários do Sistema</h2>
+        <a href="novo_usuario.php" class="btn">+ Novo Usuário</a>
+    </div>
 
-    <a href="adicionar_usuario.php" class="btn btn-add">+ Novo Usuário</a>
-
-    <h2>Usuários</h2>
+    <?php if (isset($_GET['sucesso'])): ?>
+        <div class="sucesso">Usuário cadastrado com sucesso!</div>
+    <?php endif; ?>
 
     <table>
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Nome</th>
-                <th>Usuário</th>
-                <th>Nível</th>
+                <th>Username</th>
+                <th>Criado em</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($usuarios as $u): ?>
+
+        <?php if (count($usuarios) === 0): ?>
             <tr>
-                <td><?= htmlspecialchars($u['nome']) ?></td>
-                <td><?= htmlspecialchars($u['username']) ?></td>
-                <td><?= htmlspecialchars($u['nivel']) ?></td>
-                <td>
-                    <a href="editar_usuario.php?id=<?= $u['id'] ?>" class="btn btn-edit">Editar</a>
-                    <a href="excluir_usuario.php?id=<?= $u['id'] ?>" class="btn btn-del" onclick="return confirm('Excluir usuário?');">Excluir</a>
-                </td>
+                <td colspan="5">Nenhum usuário encontrado.</td>
             </tr>
+        <?php else: ?>
+            <?php foreach ($usuarios as $u): ?>
+                <tr>
+                    <td><?= $u['id'] ?></td>
+                    <td><?= htmlspecialchars($u['nome']) ?></td>
+                    <td><?= htmlspecialchars($u['username']) ?></td>
+                    <td><?= date('d/m/Y', strtotime($u['created_at'])) ?></td>
+                    <td class="acoes">
+                        <a href="editar_usuario.php?id=<?= $u['id'] ?>">Editar</a>
+                        <a href="excluir_usuario.php?id=<?= $u['id'] ?>"
+                           class="excluir"
+                           onclick="return confirm('Deseja realmente excluir este usuário?')">
+                           Excluir
+                        </a>
+                    </td>
+                </tr>
             <?php endforeach; ?>
+        <?php endif; ?>
+
         </tbody>
     </table>
 
