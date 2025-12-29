@@ -26,9 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        echo '<pre>';
-        var_dump($user);
-        exit;
+       
         
         if ($user && password_verify($senha, $user['senha'])) {
 
@@ -95,4 +93,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </body>
 </html>
+
 
