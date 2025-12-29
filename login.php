@@ -23,9 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':username', $username, PDO::PARAM_STR);
         $stmt->execute();
-
+        
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        
+        echo '<pre>';
+        var_dump($user);
+        exit;
+        
         if ($user && password_verify($senha, $user['senha'])) {
 
             // LOGIN OK
@@ -91,3 +95,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </body>
 </html>
+
