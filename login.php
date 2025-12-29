@@ -5,30 +5,34 @@ require_once 'conexao.php';
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
+
+    $email = trim($_POST['email'] ?? '');
     $senha = $_POST['senha'] ?? '';
 
-    if ($username === '' || $senha === '') {
-        $erro = 'Preencha o usuário e a senha.';
+    if ($email === '' || $senha === '') {
+        $erro = 'Preencha o email e a senha.';
     } else {
-        $sql = "SELECT id, nome, username, senha, nivel 
-                FROM usuarios 
-                WHERE username = :username 
+
+        $sql = "SELECT id, nome, email, senha, nivel
+                FROM usuarios
+                WHERE email = :email
                 LIMIT 1";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute([':username' => $username]);
+        $stmt->execute([':email' => $email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($senha, $user['senha'])) {
+
             $_SESSION['user_id']    = $user['id'];
             $_SESSION['user_nome']  = $user['nome'];
             $_SESSION['user_nivel'] = $user['nivel'];
 
             header('Location: index.php');
             exit;
+
         } else {
-            $erro = 'Usuário ou senha inválidos.';
+            $erro = 'Email ou senha inválidos.';
         }
     }
 }
@@ -60,16 +64,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="post" action="login.php">
 
-            <label>Usuário</label>
+            <label>Email</label>
             <div class="input-group">
-                <i class="fas fa-user"></i>
-                <input type="text" name="username" placeholder="Digite seu usuário" required>
+                <i class="fas fa-envelope"></i>
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Digite seu email"
+                    required
+                >
             </div>
 
             <label>Senha</label>
             <div class="input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" name="senha" placeholder="Digite sua senha" required>
+                <input
+                    type="password"
+                    name="senha"
+                    placeholder="Digite sua senha"
+                    required
+                >
             </div>
 
             <button type="submit" class="btn-login">
