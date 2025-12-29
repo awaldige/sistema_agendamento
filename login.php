@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erro = 'Preencha o email e a senha.';
     } else {
 
-        $sql = "SELECT id, nome, email, senha, nivel
+        $sql = "SELECT id, nome, email, senha
                 FROM usuarios
                 WHERE email = :email
                 LIMIT 1";
@@ -24,9 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($senha, $user['senha'])) {
 
-            $_SESSION['user_id']    = $user['id'];
-            $_SESSION['user_nome']  = $user['nome'];
-            $_SESSION['user_nivel'] = $user['nivel'];
+            $_SESSION['user_id']   = $user['id'];
+            $_SESSION['user_nome'] = $user['nome'];
 
             header('Location: index.php');
             exit;
