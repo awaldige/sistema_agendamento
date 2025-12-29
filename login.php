@@ -6,20 +6,20 @@ $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $email = trim($_POST['email'] ?? '');
-    $senha = $_POST['senha'] ?? '';
+    $username = trim($_POST['username'] ?? '');
+    $senha    = $_POST['senha'] ?? '';
 
-    if ($email === '' || $senha === '') {
-        $erro = 'Preencha o email e a senha.';
+    if ($username === '' || $senha === '') {
+        $erro = 'Preencha usuário e senha.';
     } else {
 
-        $sql = "SELECT id, nome, email, senha
+        $sql = "SELECT id, nome, username, senha
                 FROM usuarios
-                WHERE email = :email
+                WHERE username = :username
                 LIMIT 1";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute([':email' => $email]);
+        $stmt->execute([':username' => $username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($senha, $user['senha'])) {
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
 
         } else {
-            $erro = 'Email ou senha inválidos.';
+            $erro = 'Usuário ou senha inválidos.';
         }
     }
 }
@@ -39,57 +39,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistema de Agendamentos</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Sistema</title>
 
-    <link rel="stylesheet" href="login.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="login.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <div class="login-container">
     <div class="login-box">
-        
+
         <h2><i class="fas fa-user-shield"></i> Acesso Restrito</h2>
-        <p class="subtitle">Entre para continuar</p>
 
         <?php if ($erro): ?>
-            <div class="erro-box">
-                <i class="fas fa-exclamation-circle"></i>
-                <?= htmlspecialchars($erro) ?>
-            </div>
+            <div class="erro-box"><?= htmlspecialchars($erro) ?></div>
         <?php endif; ?>
 
-        <form method="post" action="login.php">
+        <form method="post">
 
-            <label>Email</label>
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Digite seu email"
-                    required
-                >
-            </div>
+            <label>Usuário</label>
+            <input type="text" name="username" required>
 
             <label>Senha</label>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input
-                    type="password"
-                    name="senha"
-                    placeholder="Digite sua senha"
-                    required
-                >
-            </div>
+            <input type="password" name="senha" required>
 
-            <button type="submit" class="btn-login">
-                Entrar <i class="fas fa-arrow-right"></i>
-            </button>
+            <button type="submit">Entrar</button>
+
         </form>
-
     </div>
 </div>
 
