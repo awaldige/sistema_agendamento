@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
-/* ===== MESES EM PORTUGUÊS (SEM STRFTIME / INTL) ===== */
+/* ===== MESES EM PORTUGUÊS ===== */
 $meses = [
     1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março',
     4 => 'Abril', 5 => 'Maio', 6 => 'Junho',
@@ -21,25 +21,29 @@ $meses = [
 $mes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m');
 $ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
 
-/* ===== ANOS DISPONÍVEIS ===== */
+/* ===== ANOS DISPONÍVEIS (com fallback) ===== */
 $anos = $conn->query("
     SELECT DISTINCT EXTRACT(YEAR FROM data)::int AS ano
     FROM agendamentos
+    UNION
+    SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int
     ORDER BY ano DESC
 ")->fetchAll(PDO::FETCH_COLUMN);
 
-/* ===== TOTAL CONSULTAS DO MÊS ===== */
+/* ===== CONSULTAS POR DIA ===== */
 $stmt = $conn->prepare("
-    SELECT COUNT(*) 
+    SELECT EXTRACT(DAY FROM data)::int AS dia, COUNT(*) AS total
     FROM agendamentos
     WHERE EXTRACT(MONTH FROM data) = :mes
       AND EXTRACT(YEAR FROM data) = :ano
+    GROUP BY dia
+    ORDER BY dia
 ");
 $stmt->execute([
     ':mes' => $mes,
     ':ano' => $ano
 ]);
-$totalMes = (int)$stmt->fetchColumn();
+$consultasPorDia = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
 /* ===== TIPO DE CONSULTA ===== */
 $stmt = $conn->prepare("
@@ -77,31 +81,26 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <i class="fas fa-chart-line"></i> Dashboard
             </a>
         </li>
-
         <li>
             <a href="agendamentos.php">
                 <i class="fas fa-calendar-check"></i> Consultar Consultas
             </a>
         </li>
-
         <li>
             <a href="novo_agendamento.php">
                 <i class="fas fa-plus-circle"></i> Novo Agendamento
             </a>
         </li>
-
         <li>
             <a href="servicos.php">
                 <i class="fas fa-briefcase"></i> Serviços
             </a>
         </li>
-
         <li>
             <a href="usuarios.php">
                 <i class="fas fa-users"></i> Usuários
             </a>
         </li>
-
         <li>
             <a href="logout.php" style="background:#c0392b;color:#fff;">
                 <i class="fas fa-sign-out-alt"></i> Sair
@@ -131,7 +130,7 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
         <select name="mes">
             <?php foreach ($meses as $num => $nome): ?>
-                <option value="<?= $num ?>" <?= $num==$mes?'selected':'' ?>>
+                <option value="<?= $num ?>" <?= $num == $mes ? 'selected' : '' ?>>
                     <?= $nome ?>
                 </option>
             <?php endforeach; ?>
@@ -139,24 +138,20 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <select name="ano">
             <?php foreach ($anos as $a): ?>
-                <option value="<?= $a ?>" <?= $a==$ano?'selected':'' ?>>
+                <option value="<?= $a ?>" <?= $a == $ano ? 'selected' : '' ?>>
                     <?= $a ?>
                 </option>
             <?php endforeach; ?>
         </select>
 
         <button type="submit">Atualizar</button>
-
-        <a href="index.php" style="padding:10px 14px;border-radius:8px;background:#7f8c8d;color:#fff;text-decoration:none;">
-            ← Menu
-        </a>
     </form>
 
     <!-- 📊 GRÁFICOS -->
     <div class="dashboard-graficos">
 
         <div class="grafico-box">
-            <h4>Consultas – <?= $meses[$mes] ?>/<?= $ano ?></h4>
+            <h4>Consultas por dia — <?= $meses[$mes] ?>/<?= $ano ?></h4>
             <canvas id="graficoMes"></canvas>
         </div>
 
@@ -175,31 +170,65 @@ function toggleMenu() {
     document.querySelector('.sidebar').classList.toggle('open');
 }
 
-/* TOTAL DO MÊS */
+/* ===== GRÁFICO CONSULTAS POR DIA ===== */
+const dias = Array.from({length: 31}, (_, i) => i + 1);
+const dadosDias = dias.map(d => <?= json_encode($consultasPorDia) ?>[d] ?? 0);
+
 new Chart(document.getElementById('graficoMes'), {
     type: 'bar',
     data: {
-        labels: ['Consultas'],
+        labels: dias,
         datasets: [{
-            label: 'Total',
-            data: [<?= $totalMes ?>],
+            label: 'Consultas',
+            data: dadosDias,
             backgroundColor: '#4a6cf7'
         }]
     },
-    options: { responsive: true }
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: ctx => ` ${ctx.raw} consulta(s)`
+                }
+            }
+        }
+    }
 });
 
-/* TIPO DE CONSULTA */
+/* ===== GRÁFICO TIPO DE CONSULTA ===== */
 new Chart(document.getElementById('graficoTipo'), {
     type: 'doughnut',
     data: {
         labels: <?= json_encode(array_map(fn($d)=>ucfirst($d['tipo_consulta']), $dadosTipo)) ?>,
         datasets: [{
             data: <?= json_encode(array_map(fn($d)=>(int)$d['total'], $dadosTipo)) ?>,
-            backgroundColor: ['#4a6cf7','#2ecc71','#f39c12']
+            backgroundColor: [
+                '#4a6cf7',
+                '#2ecc71',
+                '#f39c12',
+                '#9b59b6',
+                '#e74c3c'
+            ]
         }]
     },
-    options: { responsive: true }
+    options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ` ${ctx.label}: ${ctx.raw} consulta(s)`
+                }
+            }
+        }
+    }
 });
 </script>
 
