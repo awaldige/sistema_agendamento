@@ -1,231 +1,152 @@
 <?php
-// servicos.php
-require_once 'auth.php';
+session_start();
 require_once 'conexao.php';
 
-$flash = $_SESSION['flash'] ?? null;
-unset($_SESSION['flash']);
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Criar novo serviço
-    $nome = trim($_POST['nome'] ?? '');
-    $descricao = trim($_POST['descricao'] ?? '');
-    $preco = $_POST['preco'] ?? null;
-
-    if ($nome === '') {
-        $_SESSION['flash'] = 'Nome do serviço é obrigatório.';
-        header('Location: servicos.php');
-        exit;
-    }
-
-    $sql = "INSERT INTO servicos (nome, descricao, preco) VALUES (:nome, :descricao, :preco)";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([
-        ':nome'      => $nome,
-        ':descricao' => $descricao ?: null,
-        ':preco'     => $preco ?: null
-    ]);
-
-    $_SESSION['flash'] = 'Serviço criado com sucesso!';
-    header('Location: servicos.php');
-    exit;
+// Proteção
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
 }
 
-// Listar serviços
-$stmt = $conn->query("SELECT id, nome, descricao, preco FROM servicos ORDER BY nome ASC");
-$servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Busca serviços (SEM preco)
+$sql = "SELECT id, nome, descricao, created_at
+        FROM servicos
+        ORDER BY nome";
+
+$servicos = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Serviços</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Serviços</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-body {
-    margin: 0;
-    padding: 0;
-    background: #f4f6fb;
-    font-family: "Poppins", sans-serif;
-}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eef2f7;
+            font-family: "Poppins", sans-serif;
+        }
 
-.container {
-    max-width: 900px;
-    margin: 40px auto;
-    background: #fff;
-    padding: 35px;
-    border-radius: 18px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
 
-h2 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #2c3e50;
-}
+        h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
 
-/* Flash */
-.flash {
-    background: #dff3d6;
-    padding: 12px;
-    border-left: 5px solid #2ecc71;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    font-weight: 500;
-}
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-/* Form */
-form {
-    margin-bottom: 35px;
-}
+        .btn {
+            padding: 10px 15px;
+            background: #4a6cf7;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 6px;
+        }
 
-.form-group {
-    margin-bottom: 18px;
-}
+        .btn.menu {
+            background: #7f8c8d;
+        }
 
-input, textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #d0d7e2;
-    border-radius: 10px;
-    background: #f9fbff;
-    font-size: 15px;
-    transition: .25s;
-}
+        .btn:hover {
+            opacity: 0.9;
+        }
 
-input:focus, textarea:focus {
-    border-color: #4a6cf7;
-    box-shadow: 0 0 0 3px rgba(74,108,247,0.15);
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-button {
-    padding: 12px 20px;
-    background: #4a6cf7;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: .25s;
-    font-size: 15px;
-}
+        th, td {
+            padding: 14px;
+            text-align: left;
+        }
 
-button:hover {
-    background: #2649f5;
-    box-shadow: 0 6px 14px rgba(74,108,247,0.25);
-}
+        th {
+            background: #f4f6fb;
+        }
 
-/* Tabela */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+        tr:nth-child(even) {
+            background: #fafbfe;
+        }
 
-th, td {
-    padding: 14px;
-    border-bottom: 1px solid #e1e6f0;
-    text-align: left;
-}
+        .acoes a {
+            margin-right: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            color: #4a6cf7;
+        }
 
-th {
-    background: #f0f3fa;
-    font-weight: 600;
-}
-
-.btn {
-    padding: 8px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #fff;
-    font-size: 13px;
-}
-
-.btn-edit {
-    background: #4a6cf7;
-}
-
-.btn-edit:hover {
-    background: #2649f5;
-}
-
-.btn-del {
-    background: #e74c3c;
-}
-
-.btn-del:hover {
-    background: #c0392b;
-}
-
-/* Voltar */
-.voltar {
-    display: inline-block;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    background: #7f8c8d;
-    color: #fff;
-    border-radius: 8px;
-    text-decoration: none;
-}
-
-.voltar:hover {
-    background: #636e72;
-}
-</style>
+        .acoes .excluir {
+            color: #e74c3c;
+        }
+    </style>
 </head>
+
 <body>
 
 <div class="container">
 
-    <a href="index.php" class="voltar">← Voltar</a>
-
-    <h2>Serviços</h2>
-
-    <?php if ($flash): ?>
-        <div class="flash"><?= htmlspecialchars($flash) ?></div>
-    <?php endif; ?>
-
-    <h3>Novo Serviço</h3>
-
-    <form action="servicos.php" method="POST">
-
-        <div class="form-group">
-            <input type="text" name="nome" required placeholder="Nome do serviço">
+    <div class="topo">
+        <h2>Serviços</h2>
+        <div>
+            <a href="index.php" class="btn menu">← Menu</a>
+            <a href="novo_servico.php" class="btn">+ Novo Serviço</a>
         </div>
-
-        <div class="form-group">
-            <textarea name="descricao" rows="3" placeholder="Descrição (opcional)"></textarea>
-        </div>
-
-        <div class="form-group">
-            <input type="number" name="preco" step="0.01" placeholder="Preço (opcional)">
-        </div>
-
-        <button type="submit">Criar Serviço</button>
-    </form>
-
-    <h3>Lista de Serviços</h3>
+    </div>
 
     <table>
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Nome</th>
-                <th>Preço</th>
+                <th>Descrição</th>
+                <th>Criado em</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-        <?php foreach ($servicos as $s): ?>
+
+        <?php if (!$servicos): ?>
             <tr>
-                <td><?= htmlspecialchars($s['nome']) ?></td>
-                <td>
-                    <?= $s['preco'] !== null ? "R$ " . number_format($s['preco'], 2, ',', '.') : '-' ?>
-                </td>
-                <td>
-                    <a class="btn btn-edit" href="servico_edit.php?id=<?= $s['id'] ?>">Editar</a>
-                    <a class="btn btn-del" href="servico_delete.php?id=<?= $s['id'] ?>" onclick="return confirm('Excluir serviço?');">Excluir</a>
-                </td>
+                <td colspan="5">Nenhum serviço encontrado.</td>
             </tr>
-        <?php endforeach; ?>
+        <?php else: ?>
+            <?php foreach ($servicos as $s): ?>
+                <tr>
+                    <td><?= $s['id'] ?></td>
+                    <td><?= htmlspecialchars($s['nome']) ?></td>
+                    <td><?= htmlspecialchars($s['descricao']) ?></td>
+                    <td><?= date('d/m/Y', strtotime($s['created_at'])) ?></td>
+                    <td class="acoes">
+                        <a href="editar_servico.php?id=<?= $s['id'] ?>">Editar</a>
+                        <a href="excluir_servico.php?id=<?= $s['id'] ?>"
+                           class="excluir"
+                           onclick="return confirm('Deseja realmente excluir este serviço?')">
+                           Excluir
+                        </a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
         </tbody>
     </table>
 
