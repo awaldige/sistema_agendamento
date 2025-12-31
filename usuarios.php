@@ -54,6 +54,11 @@ $usuarios = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
             margin-bottom: 20px;
         }
 
+        .acoes-topo {
+            display: flex;
+            gap: 8px;
+        }
+
         .btn {
             padding: 10px 15px;
             background: #4a6cf7;
@@ -63,8 +68,12 @@ $usuarios = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
             font-weight: 500;
         }
 
+        .btn.menu {
+            background: #7f8c8d;
+        }
+
         .btn:hover {
-            background: #2649f5;
+            opacity: 0.9;
         }
 
         table {
@@ -118,7 +127,11 @@ $usuarios = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="topo">
         <h2>Usuários do Sistema</h2>
-        <a href="novo_usuario.php" class="btn">+ Novo Usuário</a>
+
+        <div class="acoes-topo">
+            <a href="index.php" class="btn menu">← Menu</a>
+            <a href="novo_usuario.php" class="btn">+ Novo Usuário</a>
+        </div>
     </div>
 
     <?php if (isset($_GET['sucesso'])): ?>
