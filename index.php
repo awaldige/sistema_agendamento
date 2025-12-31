@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $nomeUsuario = $_SESSION['user_nome'] ?? 'Administrador';
 
-/* ===== MESES EM PORTUGUÊS ===== */
+/* ===== MESES ===== */
 $meses = [
     1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março',
     4 => 'Abril', 5 => 'Maio', 6 => 'Junho',
@@ -21,14 +21,19 @@ $meses = [
 $mes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m');
 $ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
 
-/* ===== ANOS DISPONÍVEIS (com fallback) ===== */
-$anos = $conn->query("
+/* ===== ANOS DISPONÍVEIS (CORRETO) ===== */
+$anosDB = $conn->query("
     SELECT DISTINCT EXTRACT(YEAR FROM data)::int AS ano
     FROM agendamentos
-    UNION
-    SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int
     ORDER BY ano DESC
 ")->fetchAll(PDO::FETCH_COLUMN);
+
+$anoAtual = (int)date('Y');
+$anos = array_unique(array_merge(
+    range($anoAtual - 5, $anoAtual),
+    $anosDB
+));
+rsort($anos);
 
 /* ===== CONSULTAS POR DIA ===== */
 $stmt = $conn->prepare("
@@ -73,81 +78,43 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
     <ul class="menu">
-        <li>
-            <a href="index.php" class="active">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-        </li>
-        <li>
-            <a href="agendamentos.php">
-                <i class="fas fa-calendar-check"></i> Consultar Consultas
-            </a>
-        </li>
-        <li>
-            <a href="novo_agendamento.php">
-                <i class="fas fa-plus-circle"></i> Novo Agendamento
-            </a>
-        </li>
-        <li>
-            <a href="servicos.php">
-                <i class="fas fa-briefcase"></i> Serviços
-            </a>
-        </li>
-        <li>
-            <a href="usuarios.php">
-                <i class="fas fa-users"></i> Usuários
-            </a>
-        </li>
-        <li>
-            <a href="logout.php" style="background:#c0392b;color:#fff;">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </a>
-        </li>
+        <li><a href="index.php" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+        <li><a href="agendamentos.php"><i class="fas fa-calendar-check"></i> Consultas</a></li>
+        <li><a href="novo_agendamento.php"><i class="fas fa-plus-circle"></i> Novo</a></li>
+        <li><a href="servicos.php"><i class="fas fa-briefcase"></i> Serviços</a></li>
+        <li><a href="usuarios.php"><i class="fas fa-users"></i> Usuários</a></li>
+        <li><a href="logout.php" style="background:#c0392b;color:#fff;"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
     </ul>
 </aside>
 
-<!-- CONTEÚDO -->
 <main class="main-content">
 
 <header>
-    <button class="toggle-btn" onclick="toggleMenu()">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <div class="user-info">
-        <i class="fas fa-user-circle"></i>
-        <?= htmlspecialchars($nomeUsuario) ?>
-    </div>
+    <button class="toggle-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <div class="user-info"><i class="fas fa-user-circle"></i> <?= htmlspecialchars($nomeUsuario) ?></div>
 </header>
 
 <section class="content-box">
     <h2>Visão Geral</h2>
 
-    <!-- 🔎 FILTRO -->
     <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
         <select name="mes">
             <?php foreach ($meses as $num => $nome): ?>
-                <option value="<?= $num ?>" <?= $num == $mes ? 'selected' : '' ?>>
-                    <?= $nome ?>
-                </option>
+                <option value="<?= $num ?>" <?= $num == $mes ? 'selected' : '' ?>><?= $nome ?></option>
             <?php endforeach; ?>
         </select>
 
         <select name="ano">
             <?php foreach ($anos as $a): ?>
-                <option value="<?= $a ?>" <?= $a == $ano ? 'selected' : '' ?>>
-                    <?= $a ?>
-                </option>
+                <option value="<?= $a ?>" <?= $a == $ano ? 'selected' : '' ?>><?= $a ?></option>
             <?php endforeach; ?>
         </select>
 
         <button type="submit">Atualizar</button>
     </form>
 
-    <!-- 📊 GRÁFICOS -->
     <div class="dashboard-graficos">
 
         <div class="grafico-box">
@@ -170,9 +137,10 @@ function toggleMenu() {
     document.querySelector('.sidebar').classList.toggle('open');
 }
 
-/* ===== GRÁFICO CONSULTAS POR DIA ===== */
+/* ===== CONSULTAS POR DIA ===== */
+const dadosPHP = <?= json_encode($consultasPorDia) ?>;
 const dias = Array.from({length: 31}, (_, i) => i + 1);
-const dadosDias = dias.map(d => <?= json_encode($consultasPorDia) ?>[d] ?? 0);
+const dadosDias = dias.map(d => dadosPHP[d] ?? 0);
 
 new Chart(document.getElementById('graficoMes'), {
     type: 'bar',
@@ -186,48 +154,24 @@ new Chart(document.getElementById('graficoMes'), {
     },
     options: {
         responsive: true,
-        scales: {
-            y: { beginAtZero: true }
-        },
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: ctx => ` ${ctx.raw} consulta(s)`
-                }
-            }
-        }
+        scales: { y: { beginAtZero: true } }
     }
 });
 
-/* ===== GRÁFICO TIPO DE CONSULTA ===== */
+/* ===== TIPO DE CONSULTA ===== */
 new Chart(document.getElementById('graficoTipo'), {
     type: 'doughnut',
     data: {
         labels: <?= json_encode(array_map(fn($d)=>ucfirst($d['tipo_consulta']), $dadosTipo)) ?>,
         datasets: [{
             data: <?= json_encode(array_map(fn($d)=>(int)$d['total'], $dadosTipo)) ?>,
-            backgroundColor: [
-                '#4a6cf7',
-                '#2ecc71',
-                '#f39c12',
-                '#9b59b6',
-                '#e74c3c'
-            ]
+            backgroundColor: ['#4a6cf7','#2ecc71','#f39c12','#9b59b6','#e74c3c']
         }]
     },
     options: {
         responsive: true,
         cutout: '65%',
-        plugins: {
-            legend: {
-                position: 'bottom'
-            },
-            tooltip: {
-                callbacks: {
-                    label: ctx => ` ${ctx.label}: ${ctx.raw} consulta(s)`
-                }
-            }
-        }
+        plugins: { legend: { position: 'bottom' } }
     }
 });
 </script>
