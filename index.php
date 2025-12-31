@@ -24,16 +24,16 @@ $ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
 /* ===== MÊS ANTERIOR ===== */
 $mesAnterior = $mes - 1;
 $anoAnterior = $ano;
-
 if ($mesAnterior === 0) {
     $mesAnterior = 12;
     $anoAnterior--;
 }
 
-/* ===== ANOS ===== */
+/* ===== ANOS DISPONÍVEIS ===== */
 $anosDB = $conn->query("
-    SELECT DISTINCT EXTRACT(YEAR FROM data)::int
+    SELECT DISTINCT EXTRACT(YEAR FROM data)::int AS ano
     FROM agendamentos
+    ORDER BY ano DESC
 ")->fetchAll(PDO::FETCH_COLUMN);
 
 $anoAtual = (int)date('Y');
@@ -69,6 +69,7 @@ $stmt = $conn->prepare("
     WHERE EXTRACT(MONTH FROM data) = :mes
       AND EXTRACT(YEAR FROM data) = :ano
     GROUP BY dia
+    ORDER BY dia
 ");
 $stmt->execute([':mes'=>$mes, ':ano'=>$ano]);
 $consultasPorDia = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -96,23 +97,23 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-.cards {
+.cards{
     display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
     gap:20px;
     margin-bottom:25px;
 }
-.card {
+.card{
     background:#fff;
     padding:22px;
     border-radius:16px;
     box-shadow:0 8px 20px rgba(0,0,0,.08);
 }
-.card h3 {font-size:14px;color:#7f8c8d;}
-.card .valor {font-size:32px;font-weight:700;margin-top:8px;}
-.card .variacao.up {color:#27ae60;}
-.card .variacao.down {color:#e74c3c;}
-.card .variacao.neutral {color:#7f8c8d;}
+.card h3{font-size:14px;color:#7f8c8d;}
+.card .valor{font-size:32px;font-weight:700;margin-top:8px;}
+.card .variacao.up{color:#27ae60;}
+.card .variacao.down{color:#e74c3c;}
+.card .variacao.neutral{color:#7f8c8d;}
 </style>
 </head>
 
@@ -133,7 +134,9 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <header>
     <button class="toggle-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-    <div class="user-info"><i class="fas fa-user-circle"></i> <?= htmlspecialchars($nomeUsuario) ?></div>
+    <div class="user-info">
+        <i class="fas fa-user-circle"></i> <?= htmlspecialchars($nomeUsuario) ?>
+    </div>
 </header>
 
 <section class="content-box">
@@ -141,15 +144,17 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <form method="GET" style="display:flex;gap:10px;margin-bottom:20px;">
 <select name="mes">
-<?php foreach ($meses as $n=>$m): ?>
+<?php foreach($meses as $n=>$m): ?>
 <option value="<?= $n ?>" <?= $n==$mes?'selected':'' ?>><?= $m ?></option>
 <?php endforeach; ?>
 </select>
+
 <select name="ano">
-<?php foreach ($anos as $a): ?>
+<?php foreach($anos as $a): ?>
 <option value="<?= $a ?>" <?= $a==$ano?'selected':'' ?>><?= $a ?></option>
 <?php endforeach; ?>
 </select>
+
 <button>Atualizar</button>
 </form>
 
@@ -162,7 +167,7 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <div class="card">
-        <h3>Comparação com mês anterior</h3>
+        <h3>Mês anterior</h3>
         <div class="valor"><?= $totalMesAnterior ?></div>
         <div><?= $meses[$mesAnterior] ?>/<?= $anoAnterior ?></div>
     </div>
@@ -181,6 +186,7 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h4>Consultas por dia</h4>
         <canvas id="graficoMes"></canvas>
     </div>
+
     <div class="grafico-box">
         <h4>Tipo de Consulta</h4>
         <canvas id="graficoTipo"></canvas>
@@ -195,35 +201,64 @@ function toggleMenu(){
     document.querySelector('.sidebar').classList.toggle('open');
 }
 
-/* CONTADOR ANIMADO */
+/* ===== CONTADOR ANIMADO ===== */
 let total = <?= $totalMes ?>;
 let contador = 0;
 const el = document.getElementById('totalMes');
-const intervalo = setInterval(()=>{
-    contador++;
-    el.innerText = contador;
-    if(contador >= total) clearInterval(intervalo);
-}, 20);
 
-/* GRÁFICOS */
-const dadosPHP = <?= json_encode($consultasPorDia) ?>;
-const dias = Array.from({length:31},(_,i)=>i+1);
-const dadosDias = dias.map(d=>dadosPHP[d]??0);
+if(el){
+    const intervalo = setInterval(()=>{
+        contador++;
+        el.innerText = contador;
+        if(contador >= total) clearInterval(intervalo);
+    }, 20);
+}
 
-new Chart(graficoMes,{
-    type:'bar',
-    data:{labels:dias,datasets:[{data:dadosDias,backgroundColor:'#4a6cf7'}]},
-    options:{responsive:true,scales:{y:{beginAtZero:true}}}
-});
+/* ===== GRÁFICO CONSULTAS POR DIA ===== */
+const dadosPHP = <?= json_encode($consultasPorDia, JSON_NUMERIC_CHECK) ?>;
+const dias = Object.keys(dadosPHP);
+const valores = Object.values(dadosPHP);
 
-new Chart(graficoTipo,{
-    type:'doughnut',
-    data:{
-        labels:<?= json_encode(array_map(fn($d)=>ucfirst($d['tipo_consulta']),$dadosTipo)) ?>,
-        datasets:[{data:<?= json_encode(array_map(fn($d)=>(int)$d['total'],$dadosTipo)) ?>}]
-    },
-    options:{responsive:true,cutout:'65%'}
-});
+const ctxMes = document.getElementById('graficoMes');
+if(ctxMes && dias.length){
+    new Chart(ctxMes,{
+        type:'bar',
+        data:{
+            labels:dias,
+            datasets:[{
+                label:'Consultas',
+                data:valores,
+                backgroundColor:'#4a6cf7',
+                borderRadius:8
+            }]
+        },
+        options:{
+            responsive:true,
+            plugins:{legend:{display:false}},
+            scales:{y:{beginAtZero:true}}
+        }
+    });
+}
+
+/* ===== GRÁFICO TIPO DE CONSULTA ===== */
+const ctxTipo = document.getElementById('graficoTipo');
+if(ctxTipo){
+    new Chart(ctxTipo,{
+        type:'doughnut',
+        data:{
+            labels:<?= json_encode(array_map(fn($d)=>ucfirst($d['tipo_consulta']),$dadosTipo)) ?>,
+            datasets:[{
+                data:<?= json_encode(array_map(fn($d)=>(int)$d['total'],$dadosTipo)) ?>,
+                backgroundColor:['#4a6cf7','#2ecc71','#f39c12','#9b59b6']
+            }]
+        },
+        options:{
+            responsive:true,
+            cutout:'65%',
+            plugins:{legend:{position:'bottom'}}
+        }
+    });
+}
 </script>
 
 </body>
