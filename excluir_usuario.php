@@ -8,32 +8,38 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$id = intval($_GET['id'] ?? 0);
+$id = (int) ($_GET['id'] ?? 0);
+
 if ($id <= 0) {
-    die('ID inválido.');
+    header("Location: usuarios.php");
+    exit();
 }
 
-// Evitar auto-exclusão
-if ($id == $_SESSION['user_id']) {
-    die('Você não pode excluir seu próprio usuário enquanto estiver logado.');
+// NÃO pode excluir o próprio usuário
+if ($id === (int)$_SESSION['user_id']) {
+    header("Location: usuarios.php?erro=proprio");
+    exit();
 }
 
-// (Opcional) Evitar excluir último admin
-// Conta admins
-$stmt = $conn->prepare("SELECT COUNT(*) FROM usuarios WHERE nivel = 'admin'");
-$stmt->execute();
-$totalAdmins = (int)$stmt->fetchColumn();
-$stmt = $conn->prepare("SELECT nivel FROM usuarios WHERE id = :id LIMIT 1");
+// Busca usuário
+$stmt = $conn->prepare("SELECT username FROM usuarios WHERE id = :id");
 $stmt->execute([':id' => $id]);
-$nivelAlvo = $stmt->fetchColumn();
+$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($nivelAlvo === 'admin' && $totalAdmins <= 1) {
-    die('Não é possível excluir o último administrador.');
+if (!$usuario) {
+    header("Location: usuarios.php");
+    exit();
 }
 
-// Executa exclusão
-$stmt = $conn->prepare("DELETE FROM usuarios WHERE id = :id LIMIT 1");
-$stmt->execute([':id' => $id]);
+// NÃO permite excluir o admin
+if ($usuario['username'] === 'admin') {
+    header("Location: usuarios.php?erro=admin");
+    exit();
+}
+
+// Exclui
+$del = $conn->prepare("DELETE FROM usuarios WHERE id = :id");
+$del->execute([':id' => $id]);
 
 header("Location: usuarios.php?excluido=1");
 exit();
