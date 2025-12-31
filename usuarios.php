@@ -8,6 +8,9 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Usuário logado
+$usuarioLogadoId = $_SESSION['user_id'];
+
 // Busca usuários
 $sql = "SELECT id, nome, username, created_at
         FROM usuarios
@@ -76,7 +79,6 @@ $usuarios = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
         th {
             background: #f4f6fb;
-            color: #2c3e50;
         }
 
         tr:nth-child(even) {
@@ -90,8 +92,13 @@ $usuarios = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
             color: #4a6cf7;
         }
 
-        .acoes a.excluir {
+        .acoes .excluir {
             color: #e74c3c;
+        }
+
+        .bloqueado {
+            color: #aaa;
+            font-size: 13px;
         }
 
         .sucesso {
@@ -130,26 +137,44 @@ $usuarios = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
         </thead>
         <tbody>
 
-        <?php if (count($usuarios) === 0): ?>
+        <?php if (!$usuarios): ?>
             <tr>
                 <td colspan="5">Nenhum usuário encontrado.</td>
             </tr>
         <?php else: ?>
             <?php foreach ($usuarios as $u): ?>
+
+                <?php
+                    $ehAdmin   = ($u['username'] === 'admin');
+                    $ehProprio = ($u['id'] == $usuarioLogadoId);
+                ?>
+
                 <tr>
                     <td><?= $u['id'] ?></td>
                     <td><?= htmlspecialchars($u['nome']) ?></td>
                     <td><?= htmlspecialchars($u['username']) ?></td>
                     <td><?= date('d/m/Y', strtotime($u['created_at'])) ?></td>
                     <td class="acoes">
+
                         <a href="editar_usuario.php?id=<?= $u['id'] ?>">Editar</a>
-                        <a href="excluir_usuario.php?id=<?= $u['id'] ?>"
-                           class="excluir"
-                           onclick="return confirm('Deseja realmente excluir este usuário?')">
-                           Excluir
-                        </a>
+
+                        <?php if ($ehAdmin): ?>
+                            <span class="bloqueado">Admin protegido</span>
+
+                        <?php elseif ($ehProprio): ?>
+                            <span class="bloqueado">Usuário atual</span>
+
+                        <?php else: ?>
+                            <a href="excluir_usuario.php?id=<?= $u['id'] ?>"
+                               class="excluir"
+                               onclick="return confirm('Deseja realmente excluir este usuário?')">
+                               Excluir
+                            </a>
+                        <?php endif; ?>
+
                     </td>
                 </tr>
+
             <?php endforeach; ?>
         <?php endif; ?>
 
