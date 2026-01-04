@@ -1,6 +1,12 @@
 <?php
 session_start();
-require_once 'conexao.php'; // Certifique-se que o arquivo tem o código que você me enviou
+require_once 'conexao.php'; 
+
+// Redireciona se já estiver logado
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
 
 $erro = '';
 
@@ -10,15 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($username && $senha) {
         try {
-            // No PostgreSQL, usamos ILIKE se quisermos busca insensível a maiúsculas
+            // Buscamos o usuário no PostgreSQL
             $sql = "SELECT id, nome, username, senha FROM usuarios WHERE username = :username LIMIT 1";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':username' => $username]);
             $usuario = $stmt->fetch();
 
-            // Verificação de senha
+            // Verificação profissional de senha
             if ($usuario && password_verify($senha, $usuario['senha'])) {
-                session_regenerate_id(true);
+                
+                session_regenerate_id(true); // Segurança contra fixação de sessão
 
                 $_SESSION['user_id']   = $usuario['id'];
                 $_SESSION['user_nome'] = $usuario['nome'];
@@ -30,12 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $erro = "Usuário ou senha inválidos.";
             }
         } catch (PDOException $e) {
-            // Log do erro para o desenvolvedor, mensagem genérica para o usuário
-            error_log($e->getMessage());
-            $erro = "Erro de comunicação com o banco de dados.";
+            $erro = "Erro de conexão com o banco de dados.";
         }
     } else {
-        $erro = "Preencha todos os campos.";
+        $erro = "Por favor, preencha todos os campos.";
     }
 }
 ?>
@@ -44,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acesso ao Sistema</title>
+    <title>Acesso Restrito</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -57,7 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #fff; padding: 40px; width: 100%; max-width: 400px;
             border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center;
         }
-        h2 { color: #1e3c72; margin-bottom: 25px; }
+        h2 { color: #1e3c72; margin-bottom: 8px; }
+        .subtitle { color: #777; font-size: 14px; margin-bottom: 25px; display: block; }
         .erro-box {
             background: #fff0f0; color: #d63031; padding: 12px; border-radius: 8px;
             margin-bottom: 20px; font-size: 14px; border: 1px solid #fab1a0;
@@ -72,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .input-field i { color: #1e3c72; margin-right: 10px; }
         .input-field input {
             border: none; background: transparent; outline: none;
-            width: 100%; padding: 12px 0; font-size: 15px;
+            width: 100%; padding: 12px 0; font-size: 15px; font-family: inherit;
         }
         .btn-login {
             width: 100%; background: #1e3c72; color: #fff; border: none;
@@ -84,10 +90,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="login-box">
-        <h2>Acesso</h2>
+        <h2>Bem-vindo</h2>
+        <span class="subtitle">Faça login para acessar o painel</span>
+
         <?php if ($erro): ?>
-            <div class="erro-box"><i class="fas fa-exclamation-circle"></i> <?= $erro ?></div>
+            <div class="erro-box">
+                <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($erro) ?>
+            </div>
         <?php endif; ?>
+
         <form method="POST">
             <div class="input-group">
                 <div class="input-field">
@@ -101,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="password" name="senha" placeholder="Senha" required>
                 </div>
             </div>
-            <button type="submit" class="btn-login">Entrar</button>
+            <button type="submit" class="btn-login">Acessar Sistema</button>
         </form>
     </div>
 </body>
