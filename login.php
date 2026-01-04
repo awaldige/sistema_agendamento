@@ -9,9 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $senha    = $_POST['senha'] ?? '';
 
-    if ($username === '' || $senha === '') {
-        $erro = "Preencha usuário e senha.";
-    } else {
+    if ($username && $senha) {
 
         $sql = "SELECT id, nome, username, senha
                 FROM usuarios
@@ -20,13 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt = $conn->prepare($sql);
         $stmt->execute([':username' => $username]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($senha, $user['senha'])) {
+        // ✅ VERIFICAÇÃO CORRETA DE SENHA
+        if ($usuario && password_verify($senha, $usuario['senha'])) {
 
-            $_SESSION['user_id']   = $user['id'];
-            $_SESSION['user_nome'] = $user['nome'];
-            $_SESSION['username']  = $user['username'];
+            $_SESSION['user_id']   = $usuario['id'];
+            $_SESSION['user_nome'] = $usuario['nome'];
+            $_SESSION['username']  = $usuario['username'];
 
             header("Location: index.php");
             exit();
@@ -34,6 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $erro = "Usuário ou senha inválidos.";
         }
+
+    } else {
+        $erro = "Preencha todos os campos.";
     }
 }
 ?>
@@ -60,7 +62,10 @@ body{
     border-radius:16px;
     box-shadow:0 10px 30px rgba(0,0,0,.1);
 }
-h2{text-align:center;margin-bottom:20px;}
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
 input{
     width:100%;
     padding:12px;
@@ -76,6 +81,7 @@ button{
     border:none;
     border-radius:8px;
     font-weight:600;
+    cursor:pointer;
 }
 .erro{
     background:#fdecea;
@@ -100,7 +106,7 @@ button{
     <form method="post">
         <input type="text" name="username" placeholder="Usuário" required>
         <input type="password" name="senha" placeholder="Senha" required>
-        <button>Entrar</button>
+        <button type="submit">Entrar</button>
     </form>
 </div>
 
