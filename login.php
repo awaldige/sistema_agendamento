@@ -7,37 +7,32 @@ $erro = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $username = trim($_POST['username'] ?? '');
-    $senha    = trim($_POST['senha'] ?? '');
+    $senha    = $_POST['senha'] ?? '';
 
     if ($username === '' || $senha === '') {
-        $erro = 'Preencha o usuário e a senha.';
+        $erro = "Preencha usuário e senha.";
     } else {
 
-        $sql = "
-            SELECT id, nome, username, senha
-            FROM usuarios
-            WHERE username = :username
-            LIMIT 1
-        ";
+        $sql = "SELECT id, nome, username, senha
+                FROM usuarios
+                WHERE username = :username
+                LIMIT 1";
 
         $stmt = $conn->prepare($sql);
-        $stmt->bindValue(':username', $username, PDO::PARAM_STR);
-        $stmt->execute();
-
+        $stmt->execute([':username' => $username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // ✅ COMPARAÇÃO SIMPLES (SENHA SEM HASH)
-        if ($user && $senha === $user['senha']) {
+        if ($user && password_verify($senha, $user['senha'])) {
 
             $_SESSION['user_id']   = $user['id'];
             $_SESSION['user_nome'] = $user['nome'];
             $_SESSION['username']  = $user['username'];
 
-            header('Location: index.php');
-            exit;
+            header("Location: index.php");
+            exit();
 
         } else {
-            $erro = 'Usuário ou senha inválidos.';
+            $erro = "Usuário ou senha inválidos.";
         }
     }
 }
@@ -46,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Login - Sistema</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
@@ -103,7 +98,7 @@ button{
     <?php endif; ?>
 
     <form method="post">
-        <input type="text" name="username" placeholder="Usuário" required autofocus>
+        <input type="text" name="username" placeholder="Usuário" required>
         <input type="password" name="senha" placeholder="Senha" required>
         <button>Entrar</button>
     </form>
