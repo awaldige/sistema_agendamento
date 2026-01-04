@@ -2,7 +2,7 @@
 session_start();
 require_once 'conexao.php'; 
 
-// Redireciona se já estiver logado
+// 1. SEGURANÇA: Redireciona se já estiver logado
 if (isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit();
@@ -16,16 +16,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($username && $senha) {
         try {
-            // Buscamos o usuário no PostgreSQL
-            $sql = "SELECT id, nome, username, senha FROM usuarios WHERE username = :username LIMIT 1";
+            // 2. BUSCA: Usamos ILIKE para evitar erro de maiúsculas/minúsculas no Postgres
+            $sql = "SELECT id, nome, username, senha FROM usuarios WHERE username ILIKE :username LIMIT 1";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':username' => $username]);
             $usuario = $stmt->fetch();
 
-            // Verificação profissional de senha
+            // 3. VERIFICAÇÃO: Compara a senha digitada com o Hash do banco
             if ($usuario && password_verify($senha, $usuario['senha'])) {
                 
-                session_regenerate_id(true); // Segurança contra fixação de sessão
+                // Regenera o ID por segurança
+                session_regenerate_id(true);
 
                 $_SESSION['user_id']   = $usuario['id'];
                 $_SESSION['user_nome'] = $usuario['nome'];
@@ -62,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #fff; padding: 40px; width: 100%; max-width: 400px;
             border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center;
         }
-        h2 { color: #1e3c72; margin-bottom: 8px; }
+        h2 { color: #1e3c72; margin-bottom: 8px; font-weight: 600; }
         .subtitle { color: #777; font-size: 14px; margin-bottom: 25px; display: block; }
         .erro-box {
             background: #fff0f0; color: #d63031; padding: 12px; border-radius: 8px;
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 0 15px; border-radius: 10px; border: 2px solid transparent; transition: 0.3s;
         }
         .input-field:focus-within { border-color: #1e3c72; background: #fff; }
-        .input-field i { color: #1e3c72; margin-right: 10px; }
+        .input-field i { color: #1e3c72; margin-right: 10px; width: 20px; text-align: center; }
         .input-field input {
             border: none; background: transparent; outline: none;
             width: 100%; padding: 12px 0; font-size: 15px; font-family: inherit;
