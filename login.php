@@ -1,37 +1,43 @@
-<?php
+    <?php
 session_start();
-require_once 'conexao.php'; 
+require_once 'conexao.php';
 
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $username = trim($_POST['username'] ?? '');
-    $senha    = trim($_POST['senha'] ?? ''); // Trim também na senha
+    $senha    = trim($_POST['senha'] ?? '');
 
-    if ($username && $senha) {
-        try {
-            // No PostgreSQL, buscamos ignorando maiúsculas/minúsculas
-            $sql = "SELECT id, nome, username, senha FROM usuarios WHERE LOWER(username) = LOWER(:username) LIMIT 1";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([':username' => $username]);
-            $usuario = $stmt->fetch();
+    if ($username === '' || $senha === '') {
+        $erro = 'Preencha o usuário e a senha.';
+    } else {
 
-            if ($usuario) {
-                // Verificação da senha
-                if (password_verify($senha, trim($usuario['senha']))) {
-                    session_regenerate_id(true);
-                    $_SESSION['user_id']   = $usuario['id'];
-                    $_SESSION['user_nome'] = $usuario['nome'];
-                    header("Location: index.php");
-                    exit();
-                } else {
-                    $erro = "Senha incorreta para este usuário.";
-                }
-            } else {
-                $erro = "O usuário '$username' não foi encontrado.";
-            }
-        } catch (PDOException $e) {
-            $erro = "Erro de conexão: " . $e->getMessage();
+        $sql = "
+            SELECT id, nome, username, senha
+            FROM usuarios
+            WHERE username = :username
+            LIMIT 1
+        ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':username', $username, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // ✅ COMPARAÇÃO SIMPLES (SENHA SEM HASH)
+        if ($user && $senha === $user['senha']) {
+
+            $_SESSION['user_id']   = $user['id'];
+            $_SESSION['user_nome'] = $user['nome'];
+            $_SESSION['username']  = $user['username'];
+
+            header('Location: index.php');
+            exit;
+
+        } else {
+            $erro = 'Usuário ou senha inválidos.';
         }
     }
 }
@@ -39,29 +45,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Login - Sistema</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background: #1e3c72; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: #fff; padding: 40px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .erro { background: #fee2e2; color: #dc2626; padding: 10px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; border: 1px solid #fecaca; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #1e3c72; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #2a5298; }
-    </style>
+<meta charset="UTF-8">
+<title>Login - Sistema</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    background:#eef2f7;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    font-family:Poppins,sans-serif;
+}
+.box{
+    background:#fff;
+    padding:30px;
+    width:320px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.1);
+}
+h2{text-align:center;margin-bottom:20px;}
+input{
+    width:100%;
+    padding:12px;
+    margin-bottom:12px;
+    border-radius:8px;
+    border:1px solid #ddd;
+}
+button{
+    width:100%;
+    padding:12px;
+    background:#4a6cf7;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-weight:600;
+}
+.erro{
+    background:#fdecea;
+    color:#c0392b;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:10px;
+    text-align:center;
+}
+</style>
 </head>
+
 <body>
-    <div class="box">
-        <h2>Entrar</h2>
-        <?php if ($erro): ?>
-            <div class="erro"><?= $erro ?></div>
-        <?php endif; ?>
-        <form method="POST">
-            <input type="text" name="username" placeholder="Usuário (awaldige)" required autofocus>
-            <input type="password" name="senha" placeholder="Senha (785143)" required>
-            <button type="submit">Acessar</button>
-        </form>
-    </div>
+
+<div class="box">
+    <h2>Login</h2>
+
+    <?php if ($erro): ?>
+        <div class="erro"><?= htmlspecialchars($erro) ?></div>
+    <?php endif; ?>
+
+    <form method="post">
+        <input type="text" name="username" placeholder="Usuário" required autofocus>
+        <input type="password" name="senha" placeholder="Senha" required>
+        <button>Entrar</button>
+    </form>
+</div>
+
 </body>
 </html>
