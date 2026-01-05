@@ -1,4 +1,4 @@
-    <?php
+<?php
 session_start();
 require_once 'conexao.php';
 
@@ -7,38 +7,35 @@ $erro = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $username = trim($_POST['username'] ?? '');
-    $senha    = trim($_POST['senha'] ?? '');
+    $senha    = $_POST['senha'] ?? '';
 
-    if ($username === '' || $senha === '') {
-        $erro = 'Preencha o usuário e a senha.';
-    } else {
+    if ($username && $senha) {
 
-        $sql = "
-            SELECT id, nome, username, senha
-            FROM usuarios
-            WHERE username = :username
-            LIMIT 1
-        ";
+        $sql = "SELECT id, nome, username, senha
+                FROM usuarios
+                WHERE username = :username
+                LIMIT 1";
 
         $stmt = $conn->prepare($sql);
-        $stmt->bindValue(':username', $username, PDO::PARAM_STR);
-        $stmt->execute();
+        $stmt->execute([':username' => $username]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        // ✅ VERIFICAÇÃO CORRETA DE SENHA
+        if ($usuario && password_verify($senha, $usuario['senha'])) {
 
-        // ✅ COMPARAÇÃO SIMPLES (SENHA SEM HASH)
-        if ($user && $senha === $user['senha']) {
+            $_SESSION['user_id']   = $usuario['id'];
+            $_SESSION['user_nome'] = $usuario['nome'];
+            $_SESSION['username']  = $usuario['username'];
 
-            $_SESSION['user_id']   = $user['id'];
-            $_SESSION['user_nome'] = $user['nome'];
-            $_SESSION['username']  = $user['username'];
-
-            header('Location: index.php');
-            exit;
+            header("Location: index.php");
+            exit();
 
         } else {
-            $erro = 'Usuário ou senha inválidos.';
+            $erro = "Usuário ou senha inválidos.";
         }
+
+    } else {
+        $erro = "Preencha todos os campos.";
     }
 }
 ?>
@@ -46,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Login - Sistema</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
@@ -65,7 +62,10 @@ body{
     border-radius:16px;
     box-shadow:0 10px 30px rgba(0,0,0,.1);
 }
-h2{text-align:center;margin-bottom:20px;}
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
 input{
     width:100%;
     padding:12px;
@@ -81,6 +81,7 @@ button{
     border:none;
     border-radius:8px;
     font-weight:600;
+    cursor:pointer;
 }
 .erro{
     background:#fdecea;
@@ -103,9 +104,9 @@ button{
     <?php endif; ?>
 
     <form method="post">
-        <input type="text" name="username" placeholder="Usuário" required autofocus>
+        <input type="text" name="username" placeholder="Usuário" required>
         <input type="password" name="senha" placeholder="Senha" required>
-        <button>Entrar</button>
+        <button type="submit">Entrar</button>
     </form>
 </div>
 
