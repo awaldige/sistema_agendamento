@@ -5,33 +5,35 @@ require_once 'conexao.php';
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 1. Limpa os dados vindos do formulário
     $username_input = trim($_POST['username'] ?? '');
     $senha_input    = trim($_POST['senha'] ?? '');
 
     if ($username_input && $senha_input) {
         try {
-            // 2. Busca ignorando maiúsculas e espaços no banco
-            $sql = "SELECT id, nome, username, senha FROM usuarios WHERE LOWER(TRIM(username)) = LOWER(:u) LIMIT 1";
+            // CORREÇÃO AQUI: Adicionado "nivel" no SELECT
+            $sql = "SELECT id, nome, username, senha, nivel FROM usuarios WHERE LOWER(TRIM(username)) = LOWER(:u) LIMIT 1";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':u' => $username_input]);
             $usuario = $stmt->fetch();
 
             if ($usuario) {
-                // 3. Limpa o hash vindo do banco antes de verificar
                 $hash_banco = trim($usuario['senha']);
 
                 if (password_verify($senha_input, $hash_banco)) {
                     session_regenerate_id(true);
-                    $_SESSION['user_id']   = $usuario['id'];
-                    $_SESSION['user_nome'] = $usuario['nome'];
+                    
+                    // SALVANDO OS DADOS NA SESSÃO
+                    $_SESSION['user_id']    = $usuario['id'];
+                    $_SESSION['user_nome']  = $usuario['nome'];
+                    $_SESSION['nivel']      = $usuario['nivel']; // Agora o verifica_admin.php vai funcionar!
+                    
                     header("Location: index.php");
                     exit();
                 } else {
                     $erro = "Senha incorreta.";
                 }
             } else {
-                $erro = "O usuário '" . htmlspecialchars($username_input) . "' não existe no banco.";
+                $erro = "O usuário '" . htmlspecialchars($username_input) . "' não existe.";
             }
         } catch (PDOException $e) {
             $erro = "Erro no Banco: " . $e->getMessage();
