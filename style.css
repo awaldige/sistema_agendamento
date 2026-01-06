@@ -26,14 +26,8 @@ body {
 }
 
 /* ================ MENU ================ */
-.menu {
-    list-style: none;
-}
-
-.menu li {
-    margin-bottom: 12px;
-}
-
+.menu { list-style: none; }
+.menu li { margin-bottom: 12px; }
 .menu a {
     display: flex;
     align-items: center;
@@ -45,17 +39,7 @@ body {
     border-radius: 8px;
     transition: 0.2s;
 }
-
-.menu a i {
-    font-size: 18px;
-}
-
-.menu a:hover {
-    background: #4a6cf7;
-    color: #fff;
-}
-
-.menu a.active {
+.menu a:hover, .menu a.active {
     background: #4a6cf7;
     color: #fff;
 }
@@ -77,6 +61,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .toggle-btn {
@@ -87,74 +72,12 @@ header {
     cursor: pointer;
 }
 
-.user-info {
-    font-weight: 500;
-    color: #2c3e50;
-}
-
-/* ================ DASHBOARD ================ */
-.dashboard-overview {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-}
-
-.overview-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 22px;
-    text-decoration: none;
-    color: #2c3e50;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-    transition: 0.2s;
-}
-
-.overview-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-}
-
-.overview-card strong {
-    font-size: 34px;
-    display: block;
-}
-
-.overview-card span {
-    color: #7f8c8d;
-}
-
-/* ================ MOBILE ================ */
-@media (max-width: 768px) {
-
-    .toggle-btn {
-        display: block;
-    }
-
-    .sidebar {
-        left: -260px;
-    }
-
-    .sidebar.open {
-        left: 0;
-    }
-
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-        padding: 18px;
-    }
-
-    .dashboard-overview {
-        grid-template-columns: 1fr;
-    }
-}
-/* =========================
-   DASHBOARD – GRÁFICOS
-========================= */
+/* ================ DASHBOARD – GRÁFICOS (AJUSTADO) ================ */
 
 .dashboard-graficos {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    /* No desktop, o primeiro gráfico (linha) é maior que o segundo (pizza) */
+    grid-template-columns: 1.5fr 1fr; 
     gap: 20px;
     margin-top: 20px;
 }
@@ -163,22 +86,46 @@ header {
     background: #fff;
     padding: 20px;
     border-radius: 14px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    height: 320px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+    /* Removido o height fixo para evitar quebras */
+    display: flex;
+    flex-direction: column;
 }
 
-.grafico-box canvas {
-    width: 100% !important;
-    height: 240px !important;
+.grafico-box h4 {
+    margin-bottom: 15px;
+    font-size: 15px;
+    color: #34495e;
+}
+
+/* Container que limita o tamanho real do gráfico */
+.chart-container {
+    position: relative;
+    /* ALTURA MÁXIMA PARA O GRÁFICO NÃO FICAR GIGANTE */
+    height: 250px; 
+    width: 100%;
+}
+
+/* ================ MOBILE ================ */
+@media (max-width: 992px) {
+    .dashboard-graficos {
+        grid-template-columns: 1fr; /* Um gráfico por linha em telas menores */
+    }
 }
 
 @media (max-width: 768px) {
-    .grafico-box {
-        height: auto;
+    .toggle-btn { display: block; }
+
+    .sidebar { left: -260px; }
+    .sidebar.open { left: 0; }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 15px;
     }
 
-    .grafico-box canvas {
-        height: 200px !important;
+    .chart-container {
+        height: 220px; /* Reduz um pouco no celular */
     }
 }
-
