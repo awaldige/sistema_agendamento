@@ -195,8 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label>Tipo de Consulta</label>
             <select name="tipo_consulta" required>
                 <option value="particular" <?= $ag['tipo_consulta'] == 'particular' ? 'selected' : '' ?>>Particular</option>
-                <option value="convenio" <?= $ag['tipo_consulta'] == 'convenio' ? 'selected' : '' ?>>Convênio</option>
-                <option value="retorno" <?= $ag['tipo_consulta'] == 'retorno' ? 'selected' : '' ?>>Retorno</option>
+                <option value="convenio" <?= $ag['tipo_consulta'] == 'convenio' ? 'selected' : '' ?>>Convênio</option>               
             </select>
 
             <label>Observações</label>
@@ -212,3 +211,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </body>
 </html>
+
