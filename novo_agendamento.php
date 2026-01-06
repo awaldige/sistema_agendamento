@@ -223,8 +223,7 @@ button:hover {
             <select name="tipo_consulta" required>
                 <option value="">Selecione</option>
                 <option value="particular">Particular</option>
-                <option value="convenio">Convênio</option>
-                <option value="retorno">Retorno</option>
+                <option value="convenio">Convênio</option>              
             </select>
 
             <label><i class="fas fa-comment-alt"></i> Observações</label>
@@ -241,3 +240,4 @@ button:hover {
 
 </body>
 </html>
+
