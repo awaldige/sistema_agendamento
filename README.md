@@ -1,15 +1,126 @@
-# Sistema de Agendamentos
+# 📅 Sistema de Agendamentos
 
-Este projeto consiste em um sistema administrativo para gerenciamento de agendamentos desenvolvido em PHP, utilizando MySQL com PDO para garantir uma camada robusta de segurança e manipulação consistente de dados. A aplicação foi projetada para atender ambientes operacionais que necessitam de controle centralizado de agendamentos, oferecendo recursos completos de autenticação, controle de sessão, gerenciamento de usuários e organização de serviços. O sistema opera com um painel administrativo responsivo, estruturado para facilitar o uso diário e proporcionar ao gestor uma visão clara das operações através de indicadores consolidados de agendamentos diários, semanais e mensais.
+Sistema administrativo para gerenciamento de agendamentos desenvolvido em **PHP** com banco de dados **MySQL/MariaDB**, oferecendo controle centralizado de agendamentos, usuários e serviços em um painel administrativo responsivo.
 
-A arquitetura do sistema utiliza PHP 7+ aliado ao MySQL/MariaDB, implementando PDO para comunicação com o banco de dados, o que permite prevenção contra ataques de injeção SQL e melhora a segurança geral da aplicação. A camada de apresentação foi desenvolvida utilizando HTML5, CSS3 e JavaScript, mantendo uma interface leve, responsiva e compatível com navegadores modernos. Recursos visuais são complementados com Font Awesome, aprimorando a usabilidade sem comprometer o desempenho. O código segue boas práticas de desenvolvimento, organização modular e tratamento adequado de exceções, garantindo maior previsibilidade e facilidade de manutenção.
+O projeto foi concebido para ambientes que necessitam organização operacional eficiente, fornecendo indicadores e ferramentas de gestão para o uso diário.
 
-O processo de implantação é direto e adequado tanto para ambientes locais quanto para servidores dedicados. Para iniciar a instalação, é necessário clonar o repositório através de  
-git clone https://github.com/awaldige/sistema_agendamento.git  
-Criar o banco de dados denominado sistema_agendamentos e importar o arquivo .sql. Na sequência, é necessário adicionar manualmente os arquivos privados que não fazem parte do repositório público por questões de segurança, como conexao.php, login.php e criar_admin.php — esses arquivos contêm credenciais e lógica sensível e, portanto, devem ser configurados por cada administrador local. Após a configuração, a aplicação pode ser acessada via http://localhost/sistema_agendamento/ ou conforme a estrutura do servidor.
+---
 
-Os arquivos sensíveis que poderiam comprometer o ambiente operacional foram deliberadamente excluídos do repositório e protegidos no .gitignore, incluindo conexao.php, login.php, criar_admin.php e .env. Para referência, são fornecidos apenas arquivos modelo com extensão *.example.php, garantindo que nenhum dado confidencial seja disponibilizado publicamente. Essa abordagem facilita a colaboração em equipe e evita incidentes de segurança relacionados a exposição de credenciais.
+## 🚀 Visão Geral
 
-A estrutura geral do projeto é composta pelos módulos principais responsáveis pelo painel administrativo — index.php, agendamentos.php, servicos.php e usuarios.php — além dos arquivos essenciais de apresentação, como style.css, login.css e script.js. O layout do projeto foi planejado para favorecer escalabilidade, permitindo a implementação futura de novas funcionalidades, integrações com APIs externas, módulos adicionais de relatórios e expansão da lógica de negócios conforme as necessidades do ambiente corporativo.
+O sistema permite:
 
-Autor: André Waldige – GitHub: https://github.com/awaldige
+- ✔ Cadastro e gerenciamento de agendamentos
+- ✔ Controle de serviços oferecidos
+- ✔ Gerenciamento de usuários
+- ✔ Painel administrativo responsivo
+- ✔ Controle de sessões e autenticação
+- ✔ Indicadores de agendamentos diários, semanais e mensais
+- ✔ Interface leve e fácil de usar
+
+O foco do projeto é oferecer uma solução prática para pequenas e médias operações que necessitam controle organizado de atendimentos e serviços.
+
+---
+
+## 🛠 Tecnologias Utilizadas
+
+- PHP 7+
+- MySQL / MariaDB
+- PDO para comunicação segura com banco de dados
+- HTML5
+- CSS3
+- JavaScript
+- Font Awesome
+
+---
+
+## 🔐 Segurança
+
+O projeto utiliza:
+
+- Conexões seguras via PDO
+- Prevenção contra SQL Injection
+- Controle de sessão para usuários autenticados
+- Exclusão de arquivos sensíveis do repositório público
+- Uso de arquivos modelo (`*.example.php`) para configuração local
+
+Arquivos protegidos via `.gitignore`:
+
+- `conexao.php`
+- `login.php`
+- `criar_admin.php`
+- `.env`
+
+Isso evita exposição de credenciais e facilita colaboração segura.
+
+---
+
+## ⚙️ Instalação
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/awaldige/sistema_agendamento.git
+2. Criar banco de dados
+Crie um banco chamado:
+
+sistema_agendamentos
+e importe o arquivo .sql do projeto.
+
+3. Configurar arquivos privados
+Configure manualmente:
+
+conexao.php
+
+login.php
+
+criar_admin.php
+
+Utilize os arquivos .example.php como modelo.
+
+4. Executar o sistema
+Acesse:
+
+http://localhost/sistema_agendamento/
+ou conforme configuração do servidor.
+
+📂 Estrutura do Projeto
+Principais módulos:
+
+/sistema_agendamento
+│
+├── index.php
+├── agendamentos.php
+├── servicos.php
+├── usuarios.php
+│
+├── css/
+│   ├── style.css
+│   └── login.css
+│
+├── js/
+│   └── script.js
+│
+└── database/
+    └── sistema_agendamentos.sql
+A arquitetura permite expansão futura com relatórios, integrações e novos módulos administrativos.
+
+📈 Possíveis Melhorias Futuras
+Painel analítico avançado
+
+API REST para integração externa
+
+Sistema de notificações
+
+Relatórios exportáveis
+
+Controle de permissões por perfil
+
+Integração com agenda externa
+
+👨‍💻 Autor
+André Waldige
+GitHub: https://github.com/awaldige
+
+⭐ Considerações
+Projeto voltado para aprendizado e aplicações práticas de gerenciamento administrativo, podendo ser expandido para ambientes corporativos conforme necessidade.
