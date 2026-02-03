@@ -105,6 +105,12 @@ Principais módulos:
     └── sistema_agendamentos.sql
 A arquitetura permite expansão futura com relatórios, integrações e novos módulos administrativos.
 
+🌐 Acesse o Projeto Online
+
+🔗https://sistema-agendamento-fm7r.onrender.com
+
+
+
 📈 Possíveis Melhorias Futuras
 Painel analítico avançado
 
