@@ -54,6 +54,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Usuário</title>
+    
+    <link rel="icon" href="agendamento_medico.jpg" type="image/jpeg">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background:#eef2f7; font-family: sans-serif; padding: 20px; }
@@ -72,6 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container">
     <h2><i class="fas fa-user-edit"></i> Editar Usuário</h2>
     
+    <?php if($mensagem): ?>
+        <div style="color: red; margin-bottom: 10px;"><?= $mensagem ?></div>
+    <?php endif; ?>
+
     <form method="POST">
         <div class="form-group">
             <label>Nome Completo</label>
