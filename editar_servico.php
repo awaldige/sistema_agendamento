@@ -39,38 +39,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-<title>Editar Serviço</title>
-<style>
-.container {
-    max-width:500px;
-    margin:60px auto;
-    background:#fff;
-    padding:30px;
-    border-radius:16px;
-}
-input, textarea {
-    width:100%;
-    padding:12px;
-    margin-bottom:15px;
-}
-.btn { background:#4a6cf7; color:#fff; padding:10px 15px; border-radius:8px; }
-.menu { background:#7f8c8d; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Serviço</title>
+
+    <link rel="icon" href="agendamento_medico.jpg" type="image/jpeg">
+
+    <style>
+        body {
+            background-color: #f3f6fb;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width:500px;
+            margin:60px auto;
+            background:#fff;
+            padding:30px;
+            border-radius:16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 { color: #333; margin-top: 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #666; }
+        input, textarea {
+            width:100%;
+            padding:12px;
+            margin-bottom:15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box; /* Garante que o padding não estoure a largura */
+        }
+        .btn { 
+            background:#4a6cf7; 
+            color:#fff; 
+            padding:12px 20px; 
+            border-radius:8px; 
+            border: none; 
+            cursor: pointer; 
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn:hover { background: #3b5be0; }
+        .menu { background:#7f8c8d; margin-left: 10px; }
+        .menu:hover { background: #6c7a7b; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-<h2>Editar Serviço</h2>
+    <h2>Editar Serviço</h2>
 
-<form method="post">
-<input type="text" name="nome" value="<?= htmlspecialchars($servico['nome']) ?>" required>
-<textarea name="descricao"><?= htmlspecialchars($servico['descricao']) ?></textarea>
+    <form method="post">
+        <label>Nome do Serviço</label>
+        <input type="text" name="nome" value="<?= htmlspecialchars($servico['nome']) ?>" required>
+        
+        <label>Descrição</label>
+        <textarea name="descricao" rows="4"><?= htmlspecialchars($servico['descricao']) ?></textarea>
 
-<button class="btn">Salvar</button>
-<a href="servicos.php" class="btn menu">Cancelar</a>
-</form>
+        <div style="margin-top: 10px;">
+            <button type="submit" class="btn">Salvar Alterações</button>
+            <a href="servicos.php" class="btn menu">Cancelar</a>
+        </div>
+    </form>
 </div>
 
 </body>
