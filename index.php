@@ -64,55 +64,57 @@ $dadosTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard | Sistema Médico</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-    /* Estilos Locais para ajuste de tamanho */
-    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:25px; }
-    .card { background:#fff; padding:20px; border-radius:18px; box-shadow:0 10px 25px rgba(0,0,0,.08); }
-    .card h3 { font-size:14px; color:#7f8c8d; margin-bottom:10px; }
-    .card .valor { font-size:32px; font-weight:700; }
-    .variacao.up { color:#27ae60 }
-    .variacao.down { color:#e74c3c }
-
-    /* CONTROLE DE TAMANHO DOS GRÁFICOS */
-    .dashboard-graficos {
-        display: grid;
-        grid-template-columns: 1.4fr 1fr; /* Proporção equilibrada */
-        gap: 20px;
-        max-width: 1300px; /* Impede que os gráficos fiquem gigantes em monitores Ultra-Wide */
-    }
-
-    .grafico-box {
-        background: #fff;
-        padding: 20px;
-        border-radius: 18px;
-        box-shadow: 0 10px 25px rgba(0,0,0,.08);
-        display: flex;
-        flex-direction: column;
-    }
-
-    .grafico-box h4 {
-        margin-bottom: 15px;
-        font-size: 15px;
-        color: #34495e;
-    }
-
-    .chart-container {
-        position: relative;
-        height: 220px; /* ALTURA FIXA E ELEGANTE */
-        width: 100%;
-    }
+    <meta charset="UTF-8">
+    <title>Dashboard | Sistema Médico</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    @media(max-width:1024px){
-        .dashboard-graficos { grid-template-columns: 1fr; }
-    }
-</style>
+    <link rel="icon" href="agendamento_medico.jpg" type="image/jpeg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Estilos Locais para ajuste de tamanho */
+        .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:25px; }
+        .card { background:#fff; padding:20px; border-radius:18px; box-shadow:0 10px 25px rgba(0,0,0,.08); }
+        .card h3 { font-size:14px; color:#7f8c8d; margin-bottom:10px; }
+        .card .valor { font-size:32px; font-weight:700; }
+        .variacao.up { color:#27ae60 }
+        .variacao.down { color:#e74c3c }
+
+        /* CONTROLE DE TAMANHO DOS GRÁFICOS */
+        .dashboard-graficos {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 20px;
+            max-width: 1300px;
+        }
+
+        .grafico-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .grafico-box h4 {
+            margin-bottom: 15px;
+            font-size: 15px;
+            color: #34495e;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 220px;
+            width: 100%;
+        }
+        
+        @media(max-width:1024px){
+            .dashboard-graficos { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 
 <body>
@@ -237,7 +239,7 @@ if(ctxDia){
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // RESPEITA O CONTAINER
+            maintainAspectRatio: false,
             plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
             scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
         }
@@ -258,7 +260,7 @@ if(ctxTipo){
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // RESPEITA O CONTAINER
+            maintainAspectRatio: false,
             cutout: '70%',
             plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } }
         }
