@@ -22,6 +22,9 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gerenciar Usuários</title>
+
+    <link rel="icon" href="agendamento_medico.jpg" type="image/jpeg">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background:#eef2f7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; padding:20px; color: #333; }
@@ -64,7 +67,7 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="container">
     <div class="header-actions">
         <div>
-            <h2 style="margin:0; color:#1e3c72;">Usuários do Sistema</h2>
+            <h2 style="margin:0; color:#1e3c72;">Usuários do Systema</h2>
             <p style="margin:5px 0 0; color:#666; font-size:14px;">Gerencie permissões e acessos.</p>
         </div>
         <div style="display: flex; gap: 10px;">
