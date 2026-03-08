@@ -16,6 +16,9 @@ $servicos = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Serviços | Sistema Médico</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="icon" href="agendamento_medico.jpg" type="image/jpeg">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <style>
