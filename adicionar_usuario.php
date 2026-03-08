@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $hash = password_hash($senha, PASSWORD_DEFAULT);
 
+            // Corrigido: Adicionado os placeholders corretos na SQL
             $sql = "INSERT INTO usuarios (nome, username, senha)
                     VALUES (:nome, :username, :senha)";
 
@@ -54,6 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8">
     <title>Novo Usuário</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="icon" href="agendamento_medico.jpg" type="image/jpeg">
+
     <style>
         body {
             margin: 0;
