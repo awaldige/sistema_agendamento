@@ -64,6 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Editar Agendamento</title>
+
+    <link rel="icon" href="agendamento_medico.jpg" type="image/jpeg">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -195,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label>Tipo de Consulta</label>
             <select name="tipo_consulta" required>
                 <option value="particular" <?= $ag['tipo_consulta'] == 'particular' ? 'selected' : '' ?>>Particular</option>
-                <option value="convenio" <?= $ag['tipo_consulta'] == 'convenio' ? 'selected' : '' ?>>Convênio</option>               
+                <option value="convenio" <?= $ag['tipo_consulta'] == 'convenio' ? 'selected' : '' ?>>Convênio</option>                
             </select>
 
             <label>Observações</label>
@@ -211,4 +214,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </body>
 </html>
-
