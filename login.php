@@ -41,6 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso ao Sistema</title>
+    
+    <link rel="icon" href="agendamento_medico.jpg" type="image/jpeg">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -60,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 0;
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            min-height: 100vh; /* Importante para mobile */
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -99,7 +102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 14px;
         }
 
-        /* Alerta de Erro */
         .erro-box {
             background: var(--error-bg);
             color: var(--error-text);
@@ -114,7 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: 1px solid #fecaca;
         }
 
-        /* Formulário e Inputs */
         form { text-align: left; }
 
         .input-label {
@@ -148,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 12px;
             outline: none;
             font-size: 15px;
-            color: #1e293b;
+            color: #1e292b;
             transition: 0.3s;
         }
 
@@ -162,7 +163,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: var(--secondary-color);
         }
 
-        /* Botão */
         .btn-login {
             width: 100%;
             background: var(--primary-color);
@@ -187,13 +187,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
         }
 
-        .btn-login:active { transform: translateY(0); }
-
-        /* Responsividade para celulares bem pequenos */
         @media (max-width: 480px) {
-            .login-box {
-                padding: 30px 20px;
-            }
+            .login-box { padding: 30px 20px; }
             .login-box h2 { font-size: 20px; }
         }
     </style>
