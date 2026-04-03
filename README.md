@@ -1,147 +1,89 @@
 # 📅 Sistema de Agendamentos
 
-Sistema administrativo para gerenciamento de agendamentos desenvolvido em **PHP** com banco de dados **MySQL/MariaDB**, oferecendo controle centralizado de agendamentos, usuários e serviços em um painel administrativo responsivo.
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white" />
+  <img src="https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white" />
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
+</p>
 
-O projeto foi concebido para ambientes que necessitam organização operacional eficiente, fornecendo indicadores e ferramentas de gestão para o uso diário.
+Sistema administrativo para gerenciamento de agendamentos desenvolvido em **PHP** com banco de dados **MySQL/MariaDB**, oferecendo controle centralizado de agendamentos, usuários e serviços em um painel administrativo responsivo.
 
 ---
 
 ## 🚀 Visão Geral
 
 O sistema permite:
-
 - ✔ Cadastro e gerenciamento de agendamentos
-- ✔ Controle de serviços oferecidos
-- ✔ Gerenciamento de usuários
-- ✔ Painel administrativo responsivo
-- ✔ Controle de sessões e autenticação
+- ✔ Controle de serviços oferecidos e usuários
+- ✔ Painel administrativo responsivo com controle de sessões
 - ✔ Indicadores de agendamentos diários, semanais e mensais
-- ✔ Interface leve e fácil de usar
 
-O foco do projeto é oferecer uma solução prática para pequenas e médias operações que necessitam controle organizado de atendimentos e serviços.
+🌐 **Acesse o Projeto Online:** [Link do Render](https://sistema-agendamento-fm7r.onrender.com)
+
+---
+
+## 📸 Prévia do Projeto
+
+<table align="center">
+  <tr>
+    <td align="center"><b>Dashboard Principal</b><br><img src="https://github.com/user-attachments/assets/46a5b1dd-c5a3-47d7-b900-b64eba829c6c" width="400px"></td>
+    <td align="center"><b>Lista de Agendamentos</b><br><img src="https://github.com/user-attachments/assets/c46a7588-0ff1-4ca1-8c60-55dda997d6cf" width="400px"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Gerenciamento</b><br><img src="https://github.com/user-attachments/assets/f403151b-edaf-4bb7-8a80-a0f90cbe4c0c" width="400px"></td>
+    <td align="center"><b>Interface de Usuários</b><br><img src="https://github.com/user-attachments/assets/9445f24d-dd73-4c0c-a161-ffc332b4fed2" width="400px"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Configurações</b><br><img src="https://github.com/user-attachments/assets/83f42769-90ca-4fb4-99d9-477cc27920d8" width="400px"></td>
+    <td align="center"><b>Tela de Login</b><br><img src="https://github.com/user-attachments/assets/17dd49c7-e383-49a0-8df7-88a2708a9cab" width="400px"></td>
+  </tr>
+</table>
 
 ---
 
 ## 🛠 Tecnologias Utilizadas
 
-- PHP 7+
-- MySQL / MariaDB
-- PDO para comunicação segura com banco de dados
-- HTML5
-- CSS3
-- JavaScript
-- Font Awesome
+- **PHP 7+** (Lógica de servidor)
+- **MySQL / MariaDB** (Persistência de dados)
+- **PDO** (Comunicação segura e Prevenção contra SQL Injection)
+- **HTML5 / CSS3 / JavaScript** (Interface e Interatividade)
+- **Font Awesome** (Ícones)
 
 ---
 
 ## 🔐 Segurança
 
-O projeto utiliza:
-
-- Conexões seguras via PDO
-- Prevenção contra SQL Injection
-- Controle de sessão para usuários autenticados
-- Exclusão de arquivos sensíveis do repositório público
-- Uso de arquivos modelo (`*.example.php`) para configuração local
-
-Arquivos protegidos via `.gitignore`:
-
-- `conexao.php`
-- `login.php`
-- `criar_admin.php`
-- `.env`
-
-Isso evita exposição de credenciais e facilita colaboração segura.
+O projeto prioriza a integridade dos dados através de:
+- Conexões seguras via **PDO**.
+- Controle rigoroso de sessão para áreas autenticadas.
+- Arquivos sensíveis (`conexao.php`, `.env`, `login.php`) protegidos via `.gitignore`.
+- Uso de arquivos modelo (`*.example.php`) para facilitar o setup sem expor credenciais.
 
 ---
 
-## ⚙️ Instalação
+## ⚙️ Instalação Local
 
-### 1. Clonar o repositório
+1. **Clonar o repositório:**
+   ```bash
+   git clone [https://github.com/awaldige/sistema_agendamento.git](https://github.com/awaldige/sistema_agendamento.git)
+Banco de Dados: Importe o arquivo database/sistema_agendamentos.sql no seu MySQL.
 
-```bash
-git clone https://github.com/awaldige/sistema_agendamento.git
-2. Criar banco de dados
-Crie um banco chamado:
+Configuração: Renomeie os arquivos .example.php para .php e insira suas credenciais locais.
 
-sistema_agendamentos
-e importe o arquivo .sql do projeto.
+Executar: Acesse via http://localhost/sistema_agendamento/.
 
-3. Configurar arquivos privados
-Configure manualmente:
+📈 Melhorias Futuras
+[ ] Painel analítico com gráficos avançados.
 
-conexao.php
+[ ] API REST para integrações externas.
 
-login.php
+[ ] Sistema de notificações por E-mail/WhatsApp.
 
-criar_admin.php
-
-Utilize os arquivos .example.php como modelo.
-
-4. Executar o sistema
-Acesse:
-
-http://localhost/sistema_agendamento/
-ou conforme configuração do servidor.
-
-📂 Estrutura do Projeto
-Principais módulos:
-
-/sistema_agendamento
-│
-├── index.php
-├── agendamentos.php
-├── servicos.php
-├── usuarios.php
-│
-├── css/
-│   ├── style.css
-│   └── login.css
-│
-├── js/
-│   └── script.js
-│
-└── database/
-    └── sistema_agendamentos.sql
-A arquitetura permite expansão futura com relatórios, integrações e novos módulos administrativos.
-
-🌐 Acesse o Projeto Online
-
-🔗 https://sistema-agendamento-fm7r.onrender.com
-
-
-📸 Prévia do Projeto
-
-![Captura de tela 2026-04-03 194017](https://github.com/user-attachments/assets/46a5b1dd-c5a3-47d7-b900-b64eba829c6c)
-
-![Captura de tela 2026-04-03 193922](https://github.com/user-attachments/assets/c46a7588-0ff1-4ca1-8c60-55dda997d6cf)
-
-![Captura de tela 2026-04-03 193840](https://github.com/user-attachments/assets/f403151b-edaf-4bb7-8a80-a0f90cbe4c0c)
-
-![Captura de tela 2026-04-03 193810](https://github.com/user-attachments/assets/9445f24d-dd73-4c0c-a161-ffc332b4fed2)
-
-![Captura de tela 2026-04-03 193739](https://github.com/user-attachments/assets/83f42769-90ca-4fb4-99d9-477cc27920d8)
-
-![Captura de tela 2026-04-03 193644](https://github.com/user-attachments/assets/17dd49c7-e383-49a0-8df7-88a2708a9cab)
-
-
-
-📈 Possíveis Melhorias Futuras
-Painel analítico avançado
-
-API REST para integração externa
-
-Sistema de notificações
-
-Relatórios exportáveis
-
-Controle de permissões por perfil
-
-Integração com agenda externa
+[ ] Integração com Google Calendar.
 
 👨‍💻 Autor
-André Waldige
-GitHub: https://github.com/awaldige
+André Waldige - Full Stack Developer
 
-⭐ Considerações
-Projeto voltado para aprendizado e aplicações práticas de gerenciamento administrativo, podendo ser expandido para ambientes corporativos conforme necessidade.
+GitHub:(https://github.com/awaldige)
+
+LinkedIn: [https://www.linkedin.com/in/andre-waldige-dev/]
