@@ -110,6 +110,21 @@ A arquitetura permite expansão futura com relatórios, integrações e novos m�
 🔗 https://sistema-agendamento-fm7r.onrender.com
 
 
+📸 Prévia do Projeto
+
+![Captura de tela 2026-04-03 194017](https://github.com/user-attachments/assets/46a5b1dd-c5a3-47d7-b900-b64eba829c6c)
+
+![Captura de tela 2026-04-03 193922](https://github.com/user-attachments/assets/c46a7588-0ff1-4ca1-8c60-55dda997d6cf)
+
+![Captura de tela 2026-04-03 193840](https://github.com/user-attachments/assets/f403151b-edaf-4bb7-8a80-a0f90cbe4c0c)
+
+![Captura de tela 2026-04-03 193810](https://github.com/user-attachments/assets/9445f24d-dd73-4c0c-a161-ffc332b4fed2)
+
+![Captura de tela 2026-04-03 193739](https://github.com/user-attachments/assets/83f42769-90ca-4fb4-99d9-477cc27920d8)
+
+![Captura de tela 2026-04-03 193644](https://github.com/user-attachments/assets/17dd49c7-e383-49a0-8df7-88a2708a9cab)
+
+
 
 📈 Possíveis Melhorias Futuras
 Painel analítico avançado
