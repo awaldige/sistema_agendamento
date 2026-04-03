@@ -18,7 +18,7 @@ O sistema permite:
 - ✔ Painel administrativo responsivo com controle de sessões
 - ✔ Indicadores de agendamentos diários, semanais e mensais
 
-🌐 **Acesse o Projeto Online:** [Link do Render](https://sistema-agendamento-fm7r.onrender.com)
+🌐 **Acesse o Projeto Online:** https://sistema-agendamento-fm7r.onrender.com/login.php
 
 ---
 
