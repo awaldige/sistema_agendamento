@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Servico {
+  id             Int            @id @default(autoincrement())
+  nome           String
+  descricao      String?
+  duracaoMinutos Int            @default(60) @map("duracao_minutos")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  agendamentos   Agendamento[]
+
+  @@map("servicos")
+}
+
+model Agendamento {
+  id          Int      @id @default(autoincrement())
+  paciente    String   @db.VarChar(120)
+  email       String?  @db.VarChar(150)
+  telefone    String?  @db.VarChar(20)
+  data        DateTime @db.Date
+  hora        String   @db.VarChar(5)
+  servicoId   Int      @map("servico_id")
+  tipo        String   @db.VarChar(20)
+  observacoes String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  servico Servico @relation(fields: [servicoId], references: [id], onDelete: Restrict)
+
+  @@index([data, hora])
+  @@index([servicoId])
+  @@map("agendamentos")
+}
