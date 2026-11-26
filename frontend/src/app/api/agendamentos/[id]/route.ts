@@ -1,5 +1,7 @@
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isAdmin } from "@/lib/auth";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -27,6 +29,15 @@ export async function PUT(
   { params }: RouteContext
 ) {
   try {
+    const permitido = await isAdmin();
+
+    if (!permitido) {
+      return NextResponse.json(
+        { erro: "Acesso permitido somente ao administrador." },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
     const agendamentoId = Number(id);
 
@@ -181,7 +192,6 @@ export async function PUT(
       );
     }
 
-
     const agendamento = await prisma.agendamento.update({
       where: { id: agendamentoId },
       data: {
@@ -220,6 +230,15 @@ export async function DELETE(
   { params }: RouteContext
 ) {
   try {
+    const permitido = await isAdmin();
+
+    if (!permitido) {
+      return NextResponse.json(
+        { erro: "Acesso permitido somente ao administrador." },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
     const agendamentoId = Number(id);
 
