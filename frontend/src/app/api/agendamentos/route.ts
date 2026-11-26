@@ -1,9 +1,19 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSession, isAdmin } from "@/lib/auth";
 
 export async function GET() {
   try {
+    const session = await getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { erro: "Não autenticado." },
+        { status: 401 }
+      );
+    }
+
     const agendamentos = await prisma.agendamento.findMany({
       include: {
         servico: {
@@ -30,6 +40,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const permitido = await isAdmin();
+
+    if (!permitido) {
+      return NextResponse.json(
+        { erro: "Acesso permitido somente ao administrador." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     const paciente =
@@ -156,10 +175,7 @@ export async function POST(request: Request) {
       const fimExistente =
         inicioExistente + existente.servico.duracaoMinutos;
 
-      return (
-        novoInicio < fimExistente &&
-        inicioExistente < novoFim
-      );
+      return novoInicio < fimExistente && inicioExistente < novoFim;
     });
 
     if (conflito) {

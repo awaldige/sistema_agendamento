@@ -1,7 +1,7 @@
-
-"use client";
+﻿"use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -47,6 +47,25 @@ const menuItems = [
 ];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Falha ao encerrar sessão.");
+      }
+
+      router.replace("/login");
+      router.refresh();
+    } catch {
+      alert("Não foi possível sair do sistema. Tente novamente.");
+    }
+  }
+
   return (
     <>
       {isOpen && (
@@ -126,8 +145,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
           <button
             type="button"
-            disabled
-            className="flex w-full cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-500"
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white"
           >
             <LogOut size={18} />
             Sair

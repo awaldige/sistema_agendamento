@@ -1,6 +1,7 @@
 ﻿
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isAdmin } from "@/lib/auth";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -12,6 +13,15 @@ export async function PUT(
   context: RouteContext
 ) {
   try {
+    const permitido = await isAdmin();
+
+    if (!permitido) {
+      return NextResponse.json(
+        { erro: "Acesso permitido somente ao administrador." },
+        { status: 403 }
+      );
+    }
+
     const { id } = await context.params;
     const idNumerico = Number(id);
 
@@ -106,6 +116,15 @@ export async function DELETE(
   context: RouteContext
 ) {
   try {
+    const permitido = await isAdmin();
+
+    if (!permitido) {
+      return NextResponse.json(
+        { erro: "Acesso permitido somente ao administrador." },
+        { status: 403 }
+      );
+    }
+
     const { id } = await context.params;
     const idNumerico = Number(id);
 
@@ -138,7 +157,9 @@ export async function DELETE(
     console.error("Erro ao excluir serviço:", error);
 
     return NextResponse.json(
-      { erro: "Não foi possível excluir o serviço. Verifique se existem agendamentos vinculados." },
+      {
+        erro: "Não foi possível excluir o serviço. Verifique se existem agendamentos vinculados.",
+      },
       { status: 500 }
     );
   }

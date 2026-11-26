@@ -1,10 +1,20 @@
 ﻿
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSession, isAdmin } from "@/lib/auth";
 
 // Lista todos os serviços
 export async function GET() {
   try {
+    const session = await getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { erro: "Não autenticado." },
+        { status: 401 }
+      );
+    }
+
     const servicos = await prisma.servico.findMany({
       orderBy: { nome: "asc" },
     });
@@ -23,6 +33,15 @@ export async function GET() {
 // Cadastra um novo serviço
 export async function POST(request: NextRequest) {
   try {
+    const permitido = await isAdmin();
+
+    if (!permitido) {
+      return NextResponse.json(
+        { erro: "Acesso permitido somente ao administrador." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     if (!body || typeof body !== "object" || Array.isArray(body)) {
