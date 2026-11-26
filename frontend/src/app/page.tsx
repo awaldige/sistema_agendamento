@@ -8,12 +8,62 @@ import {
   Plus,
 } from "lucide-react";
 
+import { prisma } from "@/lib/prisma";
 import { AppShell } from "@/components/layout/app-shell";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { WeeklyOverview } from "@/components/dashboard/weekly-overview";
 import { AppointmentsList } from "@/components/dashboard/appointments-list";
 
-export default function Home() {
+export default async function Home() {
+  // Obtém a data atual diretamente do PostgreSQL,
+  // considerando o fuso horário de São Paulo.
+  const resultadoData = await prisma.$queryRaw<{ hoje: Date }[]>`
+    SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date AS hoje
+  `;
+
+  const hoje = resultadoData[0].hoje;
+
+  const inicioHoje = new Date(
+    Date.UTC(
+      hoje.getUTCFullYear(),
+      hoje.getUTCMonth(),
+      hoje.getUTCDate()
+    )
+  );
+
+  const inicioAmanha = new Date(
+    Date.UTC(
+      hoje.getUTCFullYear(),
+      hoje.getUTCMonth(),
+      hoje.getUTCDate() + 1
+    )
+  );
+
+  // Consulta os indicadores diretamente no banco.
+  const [
+    totalAgendamentos,
+    consultasHoje,
+    pacientesUnicos,
+    totalServicos,
+  ] = await Promise.all([
+    prisma.agendamento.count(),
+
+    prisma.agendamento.count({
+      where: {
+        data: {
+          gte: inicioHoje,
+          lt: inicioAmanha,
+        },
+      },
+    }),
+
+    prisma.agendamento.groupBy({
+      by: ["paciente"],
+    }),
+
+    prisma.servico.count(),
+  ]);
+
   return (
     <AppShell>
       <div className="mx-auto max-w-7xl space-y-7">
@@ -46,20 +96,19 @@ export default function Home() {
           </button>
         </section>
 
-        {/* Indicadores */}
+        {/* Indicadores reais */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Agendamentos"
-            value="128"
-            description="em relação ao período anterior"
-            trend="+12%"
+            value={String(totalAgendamentos)}
+            description="registros cadastrados"
             icon={CalendarCheck}
             color="blue"
           />
 
           <StatCard
             title="Consultas de hoje"
-            value="18"
+            value={String(consultasHoje)}
             description="atendimentos programados"
             icon={CalendarClock}
             color="green"
@@ -67,17 +116,16 @@ export default function Home() {
 
           <StatCard
             title="Clientes cadastrados"
-            value="342"
-            description="cadastros ilustrativos"
-            trend="+8%"
+            value={String(pacientesUnicos.length)}
+            description="pacientes únicos"
             icon={Users}
             color="purple"
           />
 
           <StatCard
             title="Serviços ativos"
-            value="12"
-            description="serviços disponíveis"
+            value={String(totalServicos)}
+            description="serviços cadastrados"
             icon={BriefcaseBusiness}
             color="orange"
           />
@@ -99,8 +147,9 @@ export default function Home() {
             <p className="text-sm font-semibold text-blue-900">
               Ambiente de demonstração
             </p>
+
             <p className="mt-1 text-xs text-blue-700">
-              Este painel utiliza dados fictícios e não representa registros reais.
+              Os indicadores apresentam os registros cadastrados no sistema.
             </p>
           </div>
 
